@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.mohdsaifansari.mindtek.ui.theme.ChatBotAi.ChatBot
+import com.mohdsaifansari.mindtek.ui.theme.Components.MainEntryPoint
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,26 +23,10 @@ class MainActivity : ComponentActivity() {
             MindtekTheme {
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background) {
-                    ChatBot()
+                    MainEntryPoint()
                 }
 
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello $name!",
-            modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MindtekTheme {
-        Greeting("Android")
     }
 }

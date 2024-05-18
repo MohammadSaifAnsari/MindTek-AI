@@ -61,6 +61,9 @@ dependencies {
     implementation(libs.generativeai)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Jetpack Compose Integration
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
