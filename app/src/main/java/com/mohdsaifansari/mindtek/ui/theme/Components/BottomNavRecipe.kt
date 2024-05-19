@@ -2,6 +2,7 @@ package com.mohdsaifansari.mindtek.ui.theme.Components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
@@ -19,35 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mohdsaifansari.mindtek.MainActivity
 import com.mohdsaifansari.mindtek.ui.theme.ChatBotAi.ChatHeader
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun MainEntryPoint(){
-    val navController = rememberNavController()
-    Scaffold(topBar = {
-        ChatHeader()
-    }, bottomBar = {
-        MainBottomNavigation(navController = navController)
-    }) {innerPadding->
-        MainNavigation(navHostController = navController,innerPadding)
-    }
-}
-@Composable
-fun MainNavigation(navHostController : NavHostController,padding:PaddingValues){
-    NavHost(navController = navHostController, startDestination = BottomNavItem.AItools.route )
-    {
-        composable(BottomNavItem.AItools.route){
-            AiToolScreen()
-        }
-        composable(BottomNavItem.ChatBot.route){
-            ChatBot(padding)
-        }
-        composable(BottomNavItem.AImages.route){
-            AImageScreen()
-        }
-    }
-}
+
+
+
 
 @Composable
 fun MainBottomNavigation(navController: NavController){
@@ -56,8 +34,7 @@ fun MainBottomNavigation(navController: NavController){
         BottomNavItem.ChatBot,
         BottomNavItem.AImages,
     )
-    //Start from here
-    BottomAppBar(containerColor = Color.White, contentColor = Color.White){
+    BottomAppBar(containerColor = Color.White, contentColor = Color.White, modifier = Modifier.height(95.dp)){
         val navStack by navController.currentBackStackEntryAsState()
         val currentState = navStack?.destination?.route
         

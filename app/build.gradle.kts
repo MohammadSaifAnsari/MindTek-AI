@@ -64,6 +64,9 @@ dependencies {
     // Jetpack Compose Integration
     implementation(libs.androidx.navigation.compose)
 
+    //For loading images
+    implementation(libs.coil.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
