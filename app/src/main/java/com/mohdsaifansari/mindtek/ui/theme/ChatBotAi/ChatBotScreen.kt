@@ -74,36 +74,7 @@ fun ChatBot(
     }
 }
 
-@Preview(showBackground = true)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChatHeader() {
-    TopAppBar(
-        title = {
-            Text(text = "Mindtek", modifier = Modifier.padding(5.dp),
-                fontStyle = FontStyle.Normal)
-        },
-        colors = TopAppBarColors(
-            containerColor = Color.Red,
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
-            scrolledContainerColor = Color.White
-        ), navigationIcon = {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                modifier = Modifier.padding(5.dp),
-                contentDescription = null
-            )
-        }, actions = {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
-                modifier = Modifier.padding(5.dp),
-                contentDescription = null
-            )
-        }
-    )
-}
+
 
 
 @Composable

@@ -17,13 +17,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -32,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -97,4 +104,35 @@ fun ModalChatBox(response: String) {
     }
 
 
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatHeader() {
+    TopAppBar(
+        title = {
+            Text(text = "Mindtek", modifier = Modifier.padding(5.dp),
+                fontStyle = FontStyle.Normal)
+        },
+        colors = TopAppBarColors(
+            containerColor = Color.Red,
+            titleContentColor = Color.Black,
+            actionIconContentColor = Color.Black,
+            navigationIconContentColor = Color.Black,
+            scrolledContainerColor = Color.White
+        ), navigationIcon = {
+            Icon(
+                imageVector = Icons.Default.Menu,
+                modifier = Modifier.padding(5.dp),
+                contentDescription = null
+            )
+        }, actions = {
+            Icon(
+                imageVector = Icons.Default.ShoppingCart,
+                modifier = Modifier.padding(5.dp),
+                contentDescription = null
+            )
+        }
+    )
 }
