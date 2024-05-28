@@ -1,19 +1,14 @@
 package com.mohdsaifansari.mindtek.ui.theme.AITool
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -54,15 +48,12 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolData
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Modal.AIToolViewModal
-import com.mohdsaifansari.mindtek.ui.theme.ChatBotAi.ChatBotViewmodel
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 
 class ToolsActivity : ComponentActivity() {
@@ -108,7 +99,8 @@ fun Generation(title: String, subTitle: String,context: Context) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 20.dp, top = 60.dp, bottom = 20.dp),
-                fontSize = 20.sp,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Bold
             )
             TextField(
@@ -123,7 +115,7 @@ fun Generation(title: String, subTitle: String,context: Context) {
                 placeholder = {
                     Text(text = "Type a prompt")
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(16.dp)
             )
 
             Button(modifier = Modifier
@@ -174,7 +166,7 @@ fun Generation(title: String, subTitle: String,context: Context) {
                         IconButton(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(outputMessage))
-                                Toast.makeText(context,"Text Copied",Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context,"Copied ",Toast.LENGTH_SHORT).show()
                             }, modifier = Modifier
                                 .padding(4.dp)
                                 .align(Alignment.CenterEnd)
@@ -255,6 +247,39 @@ fun PromptCase(title: String):String{
         return ToolItem.BlogIdeas.toolPrompt
     } else if (title == ToolItem.ParagraphGenerator.title) {
         return ToolItem.ParagraphGenerator.toolPrompt
-    } else  { return ToolItem.GenerateArticle.toolPrompt
+    } else if (title == ToolItem.GenerateArticle.title) {
+        return ToolItem.GenerateArticle.toolPrompt
+    }else if (title == ToolItem.CreativeStory.title) {
+        return ToolItem.CreativeStory.toolPrompt
+    }else if (title == ToolItem.CreativeLetter.title) {
+        return ToolItem.CreativeLetter.toolPrompt
+    }else if (title == ToolItem.LoveLetter.title) {
+        return ToolItem.LoveLetter.toolPrompt
+    }else if (title == ToolItem.Poems.title) {
+        return ToolItem.Poems.toolPrompt
+    }else if (title == ToolItem.SongLyrics.title) {
+        return ToolItem.SongLyrics.toolPrompt
+    }else if (title == ToolItem.FoodRecipe.title) {
+        return ToolItem.FoodRecipe.toolPrompt
+    }else if (title == ToolItem.GrammerCorrection.title) {
+        return ToolItem.GrammerCorrection.toolPrompt
+    }else if (title == ToolItem.AnswerQuestion.title) {
+        return ToolItem.AnswerQuestion.toolPrompt
+    }else if (title == ToolItem.ActivePassive.title) {
+        return ToolItem.ActivePassive.toolPrompt
+    }else if (title == ToolItem.PassiveActive.title) {
+        return ToolItem.PassiveActive.toolPrompt
+    }else if (title == ToolItem.JobDescription.title) {
+        return ToolItem.JobDescription.toolPrompt
+    }else if (title == ToolItem.Resume.title) {
+        return ToolItem.Resume.toolPrompt
+    }else if (title == ToolItem.InterviewQuestions.title)  {
+        return ToolItem.InterviewQuestions.toolPrompt
+    }else if (title == ToolItem.TextSummarizer.title)  {
+        return ToolItem.TextSummarizer.toolPrompt
+    }else if (title == ToolItem.StorySummarizer.title)  {
+        return ToolItem.StorySummarizer.toolPrompt
+    }else{
+        return ToolItem.ParagraphSummarizer.toolPrompt
     }
 }

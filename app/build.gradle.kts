@@ -68,6 +68,10 @@ dependencies {
     //For loading images
     implementation(libs.coil.compose)
 
+    //pdf to text
+    implementation(libs.pspdfkit)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
