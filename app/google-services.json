@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "699644756923",
+    "project_id": "mintek-c9dcd",
+    "storage_bucket": "mintek-c9dcd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699644756923:android:bb9c20c400732f249bfa9e",
+        "android_client_info": {
+          "package_name": "com.mohdsaifansari.mindtek"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyEIyYkQaes_FAlPweYgzsm3e31WEF4rQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

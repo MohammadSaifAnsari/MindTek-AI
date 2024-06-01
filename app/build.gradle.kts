@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -70,6 +73,18 @@ dependencies {
 
     //pdf to text
     implementation(libs.pspdfkit)
+
+    // Import the Firebase BoM
+    implementation(platform(libs.firebase.bom))
+
+    // Add the dependency for the Firebase Authentication library
+    implementation(libs.firebase.auth.ktx)
+
+    // Add the dependency for the Firebase Firestore dependencies
+    implementation(libs.firebase.firestore)
+
+    //Splash Screen
+    implementation(libs.androidx.core.splashscreen)
 
 
     testImplementation(libs.junit)

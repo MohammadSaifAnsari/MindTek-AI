@@ -31,7 +31,6 @@ import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -44,30 +43,37 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.mohdsaifansari.mindtek.ui.theme.AImageScreen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatHeader
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatUiState
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatViewModel
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ModalChatBox
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserChatBox
 import com.mohdsaifansari.mindtek.ui.theme.Components.BottomNavItem
+import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
 import com.mohdsaifansari.mindtek.ui.theme.Components.MainBottomNavigation
-import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
+import com.mohdsaifansari.mindtek.ui.theme.ProfileScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
 class MainActivity : ComponentActivity() {
-
 
     private val uriState = MutableStateFlow("")
 
@@ -81,50 +87,88 @@ class MainActivity : ComponentActivity() {
         }
 
     }
-
     val context = this@MainActivity
+    private val auth: FirebaseAuth by lazy { Firebase.auth }
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
         setContent {
             MindtekTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                val navControllerSign = rememberNavController()
+                NavHost(
+                    navController = navControllerSign,
+                    startDestination = if (firebaseAuth.currentUser != null) {
+                        LogInItem.HomeScreen.route
+                    } else {
+                        LogInItem.AuthScreen.route
+                    }
                 ) {
+                    navigation(
+                        startDestination = LogInItem.SignIn.route,
+                        route = LogInItem.AuthScreen.route
+                    ) {
+                        composable(LogInItem.SignIn.route) {
+                            SignInScreen(auth = auth, context = context, navControllerSign)
+                        }
+                        composable(LogInItem.SignUp.route) {
+                            SignUpScreen(auth = auth, context = context, navControllerSign)
+                        }
+                    }
+                    navigation(
+                        startDestination = LogInItem.MainScreen.route,
+                        route = LogInItem.HomeScreen.route
+                    ) {
+                        composable(LogInItem.MainScreen.route) {
+                            MainEntryPoint(context, navControllerSign)
+                        }
+                    }
 
-                    MainEntryPoint(context)
+
                 }
-
             }
         }
     }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
-    fun MainEntryPoint( context: Context){
+    fun MainEntryPoint(context: Context, navControllerSign: NavController) {
         val navController = rememberNavController()
         Scaffold(topBar = {
             ChatHeader()
         }, bottomBar = {
             MainBottomNavigation(navController = navController)
-        }) {innerPadding->
-            MainNavigation(navHostController = navController,innerPadding,context)
+        }) { innerPadding ->
+            MainNavigation(
+                navHostController = navController,
+                innerPadding,
+                context,
+                navControllerSign
+            )
         }
     }
+
     @Composable
-    fun MainNavigation(navHostController : NavHostController, padding:PaddingValues,context: Context){
-        NavHost(navController = navHostController, startDestination = BottomNavItem.AItools.route )
+    fun MainNavigation(
+        navHostController: NavHostController,
+        padding: PaddingValues,
+        context: Context,
+        navControllerSign: NavController
+    ) {
+        NavHost(navController = navHostController, startDestination = BottomNavItem.AItools.route)
         {
-            composable(BottomNavItem.AItools.route){
-                MainAiToolScreen(padding,context)
+            composable(BottomNavItem.AItools.route) {
+                MainAiToolScreen(padding, context)
             }
-            composable(BottomNavItem.ChatBot.route){
+            composable(BottomNavItem.ChatBot.route) {
                 ChatScreen(paddingValues = padding)
             }
-            composable(BottomNavItem.AImages.route){
-                AImageScreen()
+            composable(BottomNavItem.AImages.route) {
+                ProfileScreen(paddingValues = padding, auth, firestore, navControllerSign, context)
             }
         }
     }
