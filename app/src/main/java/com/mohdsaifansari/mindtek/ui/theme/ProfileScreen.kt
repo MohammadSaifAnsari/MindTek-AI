@@ -279,7 +279,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun getUserData(
+fun getUserData(
     firebaseAuth: FirebaseAuth,
     firestore: FirebaseFirestore,
     context: Context

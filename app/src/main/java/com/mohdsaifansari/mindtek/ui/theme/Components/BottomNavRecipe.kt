@@ -21,7 +21,8 @@ fun MainBottomNavigation(navController: NavController){
     val items = listOf(
         BottomNavItem.AItools,
         BottomNavItem.ChatBot,
-        BottomNavItem.AImages,
+        BottomNavItem.History,
+        BottomNavItem.Profile
     )
     BottomAppBar(containerColor = Color.White, contentColor = Color.White, modifier = Modifier.height(95.dp)){
         val navStack by navController.currentBackStackEntryAsState()

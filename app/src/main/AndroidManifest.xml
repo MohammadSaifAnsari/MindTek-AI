@@ -22,11 +22,6 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Mindtek" />
         <activity
-            android:name=".ui.theme.AITool.ToolsActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Mindtek" />
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
