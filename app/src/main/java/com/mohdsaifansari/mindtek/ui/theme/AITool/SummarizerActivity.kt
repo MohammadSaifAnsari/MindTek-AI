@@ -1,5 +1,7 @@
 package com.mohdsaifansari.mindtek.ui.theme.AITool
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -7,10 +9,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
@@ -53,11 +53,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Modal.AIToolViewModal
 import com.mohdsaifansari.mindtek.ui.theme.AITool.ui.theme.MindtekTheme
+import com.mohdsaifansari.mindtek.ui.theme.Data.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.time.LocalDate
 
 class SummarizerActivity : ComponentActivity() {
 
@@ -73,6 +78,10 @@ class SummarizerActivity : ComponentActivity() {
         }
 
     }
+    val firestore = FirebaseFirestore.getInstance()
+    val firebaseAuth = FirebaseAuth.getInstance()
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -80,21 +89,28 @@ class SummarizerActivity : ComponentActivity() {
             MindtekTheme {
                 val tool_title = intent.getStringExtra("TOOL_TITLE")
                 val tool_subtitle = intent.getStringExtra("TOOL_SUBTITLE")
-                if ((tool_title == ToolItem.TextSummarizer.title)||(tool_title == ToolItem.StorySummarizer.title)||(tool_title == ToolItem.ParagraphSummarizer.title)){
-                    SummarizerScreen(title = tool_title.toString(), subtitle = tool_subtitle.toString())
-                }else{
-                    Generation(tool_title.toString(), tool_subtitle.toString(),this@SummarizerActivity)
+                if ((tool_title == ToolItem.TextSummarizer.title) || (tool_title == ToolItem.StorySummarizer.title) || (tool_title == ToolItem.ParagraphSummarizer.title)) {
+                    SummarizerScreen(
+                        title = tool_title.toString(),
+                        subtitle = tool_subtitle.toString()
+                    )
+                } else {
+                    Generation(
+                        tool_title.toString(),
+                        tool_subtitle.toString(),
+                        this@SummarizerActivity
+                    )
                 }
-
 
 
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun SummarizerScreen(title: String,subtitle:String){
+    fun SummarizerScreen(title: String, subtitle: String) {
         var path = ""
         var inputText = ""
         var outputMessage = ""
@@ -113,11 +129,14 @@ class SummarizerActivity : ComponentActivity() {
         }
         val clipboardManager = LocalClipboardManager.current
 
+        var isEnabledButton by remember {
+            mutableStateOf(false)
+        }
         Scaffold(
             topBar = {
                 SummarizerHeader(title = title)
             }
-        ) {innerPadding ->
+        ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 Text(
                     text = subtitle,
@@ -128,7 +147,7 @@ class SummarizerActivity : ComponentActivity() {
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.Bold
                 )
-                if(text.isEmpty() && extractedText.value.isEmpty()){
+                if (text.isEmpty() && extractedText.value.isEmpty()) {
                     OutlinedTextField(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -142,20 +161,22 @@ class SummarizerActivity : ComponentActivity() {
                         },
                         shape = RoundedCornerShape(16.dp)
                     )
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.9f)
-                        .padding(start = 20.dp, end = 20.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.9f)
+                            .padding(start = 20.dp, end = 20.dp)
+                    )
                     {
                         path = uri
 
-                        if(path.isNotEmpty()){
-                            Log.d("saif123",path)
-                            extractData(extractedText,path,this@SummarizerActivity)
+                        if (path.isNotEmpty()) {
+                            Log.d("saif123", path)
+                            extractData(extractedText, path, this@SummarizerActivity)
                             uri = ""
                             path = ""
                         }
-                        if (extractedText.value.isNotEmpty()){
+                        if (extractedText.value.isNotEmpty()) {
                             text = extractedText.value
                             extractedText.value = ""
                         }
@@ -176,11 +197,13 @@ class SummarizerActivity : ComponentActivity() {
                         }
 
                     }
-                }else{
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.9f)
-                        .padding(start = 20.dp, end = 20.dp))
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.9f)
+                            .padding(start = 20.dp, end = 20.dp)
+                    )
                     {
                         OutlinedTextField(
                             modifier = Modifier
@@ -198,14 +221,28 @@ class SummarizerActivity : ComponentActivity() {
                     }
 
                 }
+                if (text.isNotEmpty()) {
+                    isEnabledButton = true
+                }
                 Button(
                     onClick = {
                         inputText = text
                         text = ""
                         extractedText.value = ""
+                        val uid = firebaseAuth.currentUser?.uid.toString()
+                        firestore.collection("History").document(uid)
+                            .update("Count", FieldValue.increment(1))
+                            .addOnSuccessListener {
+                            }.addOnFailureListener {
+                                Toast.makeText(
+                                    this@SummarizerActivity,
+                                    "Something went wrong",
+                                    Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         viewmodel.sendMessage(PromptCase(title = title) + inputText)
                         showBottomSheet = true
-                    },
+                    }, enabled = isEnabledButton,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
@@ -249,7 +286,11 @@ class SummarizerActivity : ComponentActivity() {
                             IconButton(
                                 onClick = {
                                     clipboardManager.setText(AnnotatedString(outputMessage))
-                                    Toast.makeText(this@SummarizerActivity,"Copied ", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        this@SummarizerActivity,
+                                        "Copied ",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }, modifier = Modifier
                                     .padding(4.dp)
                                     .align(Alignment.CenterEnd)
@@ -262,7 +303,7 @@ class SummarizerActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        SheetContentScreen(outputMessage)
+                        SheetContentScreen(outputMessage.substring(1, (outputMessage.length - 1)))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -288,11 +329,56 @@ class SummarizerActivity : ComponentActivity() {
 
                 }
             }
+            if ((isEnabledButton == false) && inputText.isNotEmpty() && outputMessage.isNotEmpty()) {
+                savedData(inputText, outputMessage, title, this@SummarizerActivity)
+            }
             viewmodel.list.clear()
-
+            isEnabledButton = false
         }
 
     }
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun savedData(prompt: String, result: String, title: String, context: Context) {
+    val firestore = FirebaseFirestore.getInstance()
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val uid = firebaseAuth.currentUser?.uid.toString()
+    val date = date()
+
+
+    firestore.collection("History").document(uid).get().addOnSuccessListener { documentSnapshot ->
+        val count = documentSnapshot.getLong("Count")
+        val data = hashMapOf(
+            "idNo" to count,
+            "toolTitle" to title,
+            "Prompt" to prompt,
+            "Result" to result,
+            "DayOfMonth" to date.dayofMonth,
+            "Month" to date.month,
+            "Year" to date.year
+        )
+        firestore.collection("History").document(uid).collection("ToolHistory").add(data)
+            .addOnFailureListener {
+                Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+            }
+    }.addOnFailureListener {
+        Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+    }
+
+    //start
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun date(): Date {
+    val currentDate = LocalDate.now()
+    val year = currentDate.year
+    val month = currentDate.month
+    val dayOfMonth = currentDate.dayOfMonth
+    return Date(
+        dayOfMonth.toString(), month.toString(), year.toString()
+    )
 
 }
 

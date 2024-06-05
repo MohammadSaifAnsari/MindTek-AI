@@ -285,16 +285,25 @@ private fun signUp(
                 "Email" to email,
                 "Password" to password
             )
+            val count = hashMapOf(
+                "Count" to 0
+            )
             val uid = task.getResult().user?.uid
             firestore.collection("Users").document(uid.toString()).set(userProfile)
                 .addOnSuccessListener {
-                    Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show();
-                    navController.navigate(LogInItem.HomeScreen.route) {
-                        popUpTo(LogInItem.AuthScreen.route) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+                    firestore.collection("History").document(uid.toString()).set(count)
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT)
+                                .show();
+                            navController.navigate(LogInItem.HomeScreen.route) {
+                                popUpTo(LogInItem.AuthScreen.route) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }.addOnFailureListener {
+                        Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
                     }
                 }.addOnFailureListener {
                     Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();

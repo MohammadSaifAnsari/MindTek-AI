@@ -14,12 +14,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.DrawerValue
@@ -178,7 +175,7 @@ class MainActivity : ComponentActivity() {
                         contentDescription = null
                     )
                     Text(
-                        text = profileData.firstName+profileData.lastName,
+                        text = profileData.firstName + profileData.lastName,
                         modifier = Modifier.padding(start = 20.dp, top = 2.dp),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
@@ -256,8 +253,8 @@ class MainActivity : ComponentActivity() {
             composable(BottomNavItem.ChatBot.route) {
                 ChatScreen(paddingValues = padding)
             }
-            composable(BottomNavItem.History.route){
-                ToolHistory(paddingValues = padding)
+            composable(BottomNavItem.History.route) {
+                ToolHistory(paddingValues = padding, context)
             }
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(paddingValues = padding, auth, firestore, navControllerSign, context)

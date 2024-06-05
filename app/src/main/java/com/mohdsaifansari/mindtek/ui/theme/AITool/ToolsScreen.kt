@@ -1,7 +1,10 @@
 package com.mohdsaifansari.mindtek.ui.theme.AITool
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +34,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,13 +51,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Modal.AIToolViewModal
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Generation(title: String, subTitle: String,context: Context) {
+fun Generation(title: String, subTitle: String, context: Context) {
+    val firestore = FirebaseFirestore.getInstance()
+    val firebaseAuth = FirebaseAuth.getInstance()
     var inputText = ""
     var outputMessage = ""
     val viewmodel: AIToolViewModal = viewModel()
@@ -68,6 +76,9 @@ fun Generation(title: String, subTitle: String,context: Context) {
     }
     val clipboardManager = LocalClipboardManager.current
     var showDialog by remember {
+        mutableStateOf(false)
+    }
+    var isEnabledButton by remember {
         mutableStateOf(false)
     }
     Scaffold(
@@ -99,7 +110,9 @@ fun Generation(title: String, subTitle: String,context: Context) {
                 },
                 shape = RoundedCornerShape(16.dp)
             )
-
+            if (text.isNotEmpty()) {
+                isEnabledButton = true
+            }
             Button(modifier = Modifier
                 .align(Alignment.End)
                 .padding(end = 20.dp, top = 20.dp),
@@ -107,9 +120,18 @@ fun Generation(title: String, subTitle: String,context: Context) {
                     inputText = text
                     text = ""
                     showDialog = true
+                    val uid = firebaseAuth.currentUser?.uid.toString()
+                    firestore.collection("History").document(uid)
+                        .update("Count", FieldValue.increment(1))
+                        .addOnSuccessListener {
+                        }.addOnFailureListener {
+                            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT)
+                                .show();
+                        }
                     viewmodel.sendMessage(PromptCase(title = title) + inputText)
                     showBottomSheet = true
-                }) {
+                }, enabled = isEnabledButton
+            ) {
                 Text(text = "Generate")
             }
 
@@ -133,7 +155,7 @@ fun Generation(title: String, subTitle: String,context: Context) {
                     ) {
                         IconButton(
                             onClick = {
-                                      showBottomSheet = false
+                                showBottomSheet = false
                             }, modifier = Modifier
                                 .padding(4.dp)
                                 .align(Alignment.CenterStart)
@@ -148,7 +170,7 @@ fun Generation(title: String, subTitle: String,context: Context) {
                         IconButton(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(outputMessage))
-                                Toast.makeText(context,"Copied ",Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Copied ", Toast.LENGTH_SHORT).show()
                             }, modifier = Modifier
                                 .padding(4.dp)
                                 .align(Alignment.CenterEnd)
@@ -161,7 +183,7 @@ fun Generation(title: String, subTitle: String,context: Context) {
                             )
                         }
                     }
-                    SheetContentScreen(outputMessage)
+                    SheetContentScreen(outputMessage.substring(1, (outputMessage.length - 1)))
                     showDialog = false
                     Box(
                         modifier = Modifier
@@ -184,23 +206,25 @@ fun Generation(title: String, subTitle: String,context: Context) {
                         }
                     }
                 }
-
-
             }
         }
-        if (showDialog){
+        if ((isEnabledButton == false) && inputText.isNotEmpty() && outputMessage.isNotEmpty() && (showBottomSheet == false)) {
+            Log.d("tool1234", inputText + outputMessage + title)
+            savedData(inputText, outputMessage, title, context)
+        }
+        if (showDialog) {
             Dialog(onDismissRequest = { showDialog = false }) {
                 CircularProgressIndicator(color = Color.Red)
             }
         }
         viewmodel.list.clear()
+        isEnabledButton = false
     }
 }
 
 
-
 @Composable
-fun SheetContentScreen(getResponse:String) {
+fun SheetContentScreen(getResponse: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -217,8 +241,7 @@ fun SheetContentScreen(getResponse:String) {
 }
 
 
-
-fun PromptCase(title: String):String{
+fun PromptCase(title: String): String {
     if (title == ToolItem.MailGeneration.title) {
         return ToolItem.MailGeneration.toolPrompt
     } else if (title == ToolItem.BlogGeneration.title) {
@@ -231,37 +254,37 @@ fun PromptCase(title: String):String{
         return ToolItem.ParagraphGenerator.toolPrompt
     } else if (title == ToolItem.GenerateArticle.title) {
         return ToolItem.GenerateArticle.toolPrompt
-    }else if (title == ToolItem.CreativeStory.title) {
+    } else if (title == ToolItem.CreativeStory.title) {
         return ToolItem.CreativeStory.toolPrompt
-    }else if (title == ToolItem.CreativeLetter.title) {
+    } else if (title == ToolItem.CreativeLetter.title) {
         return ToolItem.CreativeLetter.toolPrompt
-    }else if (title == ToolItem.LoveLetter.title) {
+    } else if (title == ToolItem.LoveLetter.title) {
         return ToolItem.LoveLetter.toolPrompt
-    }else if (title == ToolItem.Poems.title) {
+    } else if (title == ToolItem.Poems.title) {
         return ToolItem.Poems.toolPrompt
-    }else if (title == ToolItem.SongLyrics.title) {
+    } else if (title == ToolItem.SongLyrics.title) {
         return ToolItem.SongLyrics.toolPrompt
-    }else if (title == ToolItem.FoodRecipe.title) {
+    } else if (title == ToolItem.FoodRecipe.title) {
         return ToolItem.FoodRecipe.toolPrompt
-    }else if (title == ToolItem.GrammerCorrection.title) {
+    } else if (title == ToolItem.GrammerCorrection.title) {
         return ToolItem.GrammerCorrection.toolPrompt
-    }else if (title == ToolItem.AnswerQuestion.title) {
+    } else if (title == ToolItem.AnswerQuestion.title) {
         return ToolItem.AnswerQuestion.toolPrompt
-    }else if (title == ToolItem.ActivePassive.title) {
+    } else if (title == ToolItem.ActivePassive.title) {
         return ToolItem.ActivePassive.toolPrompt
-    }else if (title == ToolItem.PassiveActive.title) {
+    } else if (title == ToolItem.PassiveActive.title) {
         return ToolItem.PassiveActive.toolPrompt
-    }else if (title == ToolItem.JobDescription.title) {
+    } else if (title == ToolItem.JobDescription.title) {
         return ToolItem.JobDescription.toolPrompt
-    }else if (title == ToolItem.Resume.title) {
+    } else if (title == ToolItem.Resume.title) {
         return ToolItem.Resume.toolPrompt
-    }else if (title == ToolItem.InterviewQuestions.title)  {
+    } else if (title == ToolItem.InterviewQuestions.title) {
         return ToolItem.InterviewQuestions.toolPrompt
-    }else if (title == ToolItem.TextSummarizer.title)  {
+    } else if (title == ToolItem.TextSummarizer.title) {
         return ToolItem.TextSummarizer.toolPrompt
-    }else if (title == ToolItem.StorySummarizer.title)  {
+    } else if (title == ToolItem.StorySummarizer.title) {
         return ToolItem.StorySummarizer.toolPrompt
-    }else{
+    } else {
         return ToolItem.ParagraphSummarizer.toolPrompt
     }
 }
