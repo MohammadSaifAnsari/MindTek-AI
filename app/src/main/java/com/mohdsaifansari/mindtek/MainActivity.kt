@@ -6,12 +6,12 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,17 +27,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -50,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -91,8 +93,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private val uriState = MutableStateFlow("")
-
-    private val imagePicker = registerForActivityResult<PickVisualMediaRequest, Uri?>(
+    val imagePicker = registerForActivityResult<PickVisualMediaRequest, Uri?>(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
@@ -111,7 +112,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color(220, 226, 241, 255).toArgb(),
+                Color.Transparent.toArgb()
+            ), navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            )
+        )
         setContent {
             MindtekTheme {
                 val navControllerSign = rememberNavController()
@@ -142,7 +151,14 @@ class MainActivity : ComponentActivity() {
                             MainEntryPoint(context, navControllerSign)
                         }
                     }
-
+                    navigation(
+                        startDestination = LogInItem.ProfileEditScreen.route,
+                        route = LogInItem.ProfileEditNav.route
+                    ) {
+                        composable(LogInItem.ProfileEditScreen.route) {
+                            EditProfile(firebaseAuth, firestore, context, imagePicker, uriState)
+                        }
+                    }
 
                 }
             }
@@ -159,10 +175,9 @@ class MainActivity : ComponentActivity() {
         val profileData = getUserData(firebaseAuth, firestore, context)
 
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(drawerContainerColor = Color.White, drawerContentColor = Color.Black) {
                 Column(
                     modifier = Modifier
-                        .background(Color.Cyan)
                         .fillMaxWidth()
                         .height(200.dp)
                 ) {
@@ -178,16 +193,18 @@ class MainActivity : ComponentActivity() {
                         text = profileData.firstName + profileData.lastName,
                         modifier = Modifier.padding(start = 20.dp, top = 2.dp),
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black
                     )
                     Text(
                         text = profileData.email,
                         modifier = Modifier.padding(start = 20.dp, top = 2.dp),
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Black
                     )
                 }
-                Divider()
+                HorizontalDivider()
                 NavigationDrawerItem(
                     label = { Text(text = "Setting") },
                     selected = false,
@@ -195,7 +212,8 @@ class MainActivity : ComponentActivity() {
                         coroutineScope.launch {
                             drawerState.close()
                         }
-                    })
+                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
                 NavigationDrawerItem(
                     label = { Text(text = "Help and Feedback") },
                     selected = false,
@@ -203,7 +221,8 @@ class MainActivity : ComponentActivity() {
                         coroutineScope.launch {
                             drawerState.close()
                         }
-                    })
+                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
                 NavigationDrawerItem(
                     label = { Text(text = "Logout") },
                     selected = false,
@@ -219,7 +238,8 @@ class MainActivity : ComponentActivity() {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    })
+                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
             }
         }) {
             Scaffold(topBar = {

@@ -17,43 +17,51 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 
 @Composable
-fun MainBottomNavigation(navController: NavController){
+fun MainBottomNavigation(navController: NavController) {
     val items = listOf(
         BottomNavItem.AItools,
         BottomNavItem.ChatBot,
         BottomNavItem.History,
         BottomNavItem.Profile
     )
-    BottomAppBar(containerColor = Color.White, contentColor = Color.White, modifier = Modifier.height(95.dp)){
+    BottomAppBar(
+        containerColor = Color.White,
+        contentColor = Color.Black,
+        modifier = Modifier.height(95.dp)
+    ) {
         val navStack by navController.currentBackStackEntryAsState()
         val currentState = navStack?.destination?.route
-        
-        items.forEach{ item ->
+
+        items.forEach { item ->
             NavigationBarItem(
                 label = {
-                        Text(item.label)
-                }, 
-                selected = currentState == item.route, 
-                onClick = { 
-                    navController.navigate(item.route){
-                        navController.graph.startDestinationRoute?.let{
+                    Text(item.label)
+                },
+                selected = currentState == item.route,
+                onClick = {
+                    navController.navigate(item.route) {
+                        navController.graph.startDestinationRoute?.let {
                             popUpTo(item.route)
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }      
+                    }
                 },
                 icon = {
-                    Icon(imageVector = item.icon, 
+                    Icon(
+                        imageVector = item.icon,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp))
-                }, 
-                alwaysShowLabel = true ,
-                colors = NavigationBarItemColors(selectedIconColor = Color.Red,
-                    unselectedIconColor = Color.Black, selectedTextColor = Color.Red,
-                    unselectedTextColor = Color.Black, disabledTextColor = Color.Black,
-                    disabledIconColor = Color.Black, selectedIndicatorColor = Color.White)
-                
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
+                alwaysShowLabel = true,
+                colors = NavigationBarItemColors(
+                    selectedIconColor = Color.Green,
+                    unselectedIconColor = Color.DarkGray, selectedTextColor = Color.Magenta,
+                    unselectedTextColor = Color.DarkGray, disabledTextColor = Color.LightGray,
+                    disabledIconColor = Color.LightGray, selectedIndicatorColor = Color.Transparent
+                )
+
             )
         }
     }

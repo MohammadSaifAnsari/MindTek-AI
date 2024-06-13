@@ -1,8 +1,11 @@
 package com.mohdsaifansari.mindtek.ui.theme
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,32 +18,42 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
+import com.mohdsaifansari.mindtek.ui.theme.Data.ProfileItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.UserData
+import okio.IOException
+import java.io.File
 
 
 @Composable
@@ -52,11 +65,26 @@ fun ProfileScreen(
     context: Context
 ) {
     val profileData = getUserData(firebaseAuth, firestore, context)
-
+    val ProfileItemlist = listOf(
+        "Personal info",
+        "Help Center",
+        "Privacy Policy",
+        "About Mindtek",
+        "Logout"
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFDCE2F1), // #dee4f4
+                        Color(0xFFFFFFFF)
+                    ), start = Offset(0f, 0f),
+                    end = Offset(0f, Float.POSITIVE_INFINITY)
+                )
+            ),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -70,212 +98,114 @@ fun ProfileScreen(
             }, modifier = Modifier
                 .padding(4.dp)
                 .size(120.dp)
+                .clip(CircleShape)
         ) {
-            Icon(
-                Icons.Default.Face, contentDescription = null,
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
+            ProfilePicture(context = context)
         }
         //Name
         Text(
             text = profileData.firstName + profileData.lastName,
             fontWeight = FontWeight.Bold,
             fontSize = 25.sp,
-            modifier = Modifier.padding(5.dp)
+            modifier = Modifier.padding(5.dp),
+            fontFamily = FontFamily.Serif
         )
         //Email
         Text(
             text = profileData.email, fontWeight = FontWeight.Light, fontSize = 15.sp,
-            modifier = Modifier.padding(bottom = 15.dp)
+            modifier = Modifier.padding(bottom = 14.dp),
+            fontFamily = FontFamily.SansSerif
         )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(80.dp)
         )
-        //About Us
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Info, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-            Text(
-                text = "About Us",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(5.dp)
-            )
-            Spacer(modifier = Modifier.fillMaxWidth(0.8f))
-            Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-        }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
-        //Rate App
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Star, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-            Text(
-                text = "Rate App",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(5.dp)
-            )
-            Spacer(modifier = Modifier.fillMaxWidth(0.8f))
-            Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-        }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
-        //Share
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Share, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-            Text(
-                text = "Share Mindtek",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(5.dp)
-            )
-            Spacer(modifier = Modifier.fillMaxWidth(0.75f))
-            Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-        }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
-        //Privacy Policy
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Lock, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-            Text(
-                text = "Privacy Policy",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(5.dp)
-            )
-            Spacer(modifier = Modifier.fillMaxWidth(0.75f))
-            Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-        }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
-        //Logout
+
+        ProfileItemRow(navController, firebaseAuth = firebaseAuth, items = ProfileItemlist)
+    }
+}
+
+
+@Composable
+fun ProfileItemRow(navController: NavController, firebaseAuth: FirebaseAuth, items: List<String>) {
+    for (item in items) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .clickable {
-                    firebaseAuth.signOut()
-                    navController.navigate(LogInItem.AuthScreen.route) {
-                        popUpTo(LogInItem.HomeScreen.route) {
-                            inclusive = true
+                    if (item == "Logout") {
+                        firebaseAuth.signOut()
+                        navController.navigate(LogInItem.AuthScreen.route) {
+                            popUpTo(LogInItem.HomeScreen.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
+                    } else if (item == "Personal info") {
+                        navController.navigate(LogInItem.ProfileEditNav.route) {
+                            popUpTo(LogInItem.ProfileEditNav.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 },
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            Icon(
-                Icons.Default.Info, contentDescription = null,
+            Row(
                 modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
-            Text(
-                text = "Logout",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(5.dp)
-            )
-            Spacer(modifier = Modifier.fillMaxWidth(0.80f))
-            Icon(
-                Icons.Default.KeyboardArrowRight, contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                    .background(Color.Transparent), tint = Color.Black
-            )
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    painter = painterResource(id = profileItemIcon(item)),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp),
+                    if (item == "Logout") {
+                        colorResource(id = R.color.red)
+                    } else {
+                        colorResource(id = R.color.black)
+                    }
+                )
+                Text(
+                    text = item,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp, fontFamily = FontFamily.Serif,
+                    modifier = Modifier.padding(5.dp),
+                    color = if (item == "Logout") {
+                        Color.Red
+                    } else {
+                        Color.Black
+                    }
+                )
+            }
+            if (item != "Logout") {
+                Icon(
+                    Icons.Default.KeyboardArrowRight, contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
+                        .background(Color.Transparent), tint = Color.Black
+                )
+            }
         }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
     }
+
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(4.dp)
+    )
 }
 
 @Composable
@@ -302,6 +232,77 @@ fun getUserData(
         }.addOnFailureListener {
             Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
         }
-    Log.d("qwe123", UserData(firstUserName, lastUserName, curUserEmail).toString())
     return UserData(firstUserName, lastUserName, curUserEmail)
+}
+
+@Composable
+fun ProfilePicture(context: Context) {
+    var bitmapState by remember { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(Unit) {
+        retrieveProfilePicture(context) { bitmap ->
+            bitmapState = bitmap
+        }
+    }
+
+    if (bitmapState != null) {
+        Image(
+            modifier = Modifier
+                .size(120.dp)
+                .padding(bottom = 2.dp)
+                .clip(CircleShape),
+            contentDescription = "picked profile image",
+            contentScale = ContentScale.Crop,
+            bitmap = bitmapState!!.asImageBitmap()
+        )
+    } else {
+        Image(
+            modifier = Modifier
+                .size(120.dp)
+                .padding(bottom = 2.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Fit,
+            painter = painterResource(id = R.drawable.personicon),
+            contentDescription = null
+        )
+    }
+}
+
+fun retrieveProfilePicture(context: Context, onBitmapRetrieved: (Bitmap?) -> Unit) {
+    val firebaseStorage = FirebaseStorage.getInstance()
+    val firebaseAuth = FirebaseAuth.getInstance()
+
+    val uid = firebaseAuth.currentUser?.uid.toString()
+    val storageReference = firebaseStorage.getReference()
+    val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
+
+    try {
+        val file = File.createTempFile("Profile Photo", ".png")
+        profilePhoto.getFile(file).addOnSuccessListener {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            onBitmapRetrieved(bitmap)
+            Log.d("photo123", "run")
+        }.addOnFailureListener {
+            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+            onBitmapRetrieved(null)
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+        onBitmapRetrieved(null)
+    }
+}
+
+
+fun profileItemIcon(itemname: String): Int {
+    if (itemname == ProfileItem.Personalinfo.name) {
+        return ProfileItem.Personalinfo.painter
+    } else if (itemname == ProfileItem.HelpCenter.name) {
+        return ProfileItem.HelpCenter.painter
+    } else if (itemname == ProfileItem.PrivacyPolicy.name) {
+        return ProfileItem.PrivacyPolicy.painter
+    } else if (itemname == ProfileItem.AboutMindtek.name) {
+        return ProfileItem.AboutMindtek.painter
+    } else {
+        return ProfileItem.Logout.painter
+    }
 }

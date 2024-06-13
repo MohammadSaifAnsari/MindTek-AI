@@ -2,7 +2,8 @@ package com.mohdsaifansari.mindtek.ui.theme.AITool
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,18 +19,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolData
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 
@@ -77,44 +84,29 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             .fillMaxSize()
             .padding(paddingValues)
             .verticalScroll(rememberScrollState())
+            .background(brush = Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFFDCE2F1), // #dee4f4
+                    Color(0xFFFFFFFF)
+                ), start = Offset(0f,0f),
+                end = Offset(0f, Float.POSITIVE_INFINITY)
+            ))
     ) {
-        Text(text = "Summarizer", modifier = Modifier.padding(8.dp))
+        Text(text = "Summarizer", modifier = Modifier.padding(8.dp), color = Color.Black)
         ScrollableCardView(itemSummarizer,context)
-        Text(text = "Content Writing Tools", modifier = Modifier.padding(8.dp))
+        Text(text = "Content Writing Tools", modifier = Modifier.padding(8.dp), color = Color.Black)
         ScrollableCardView(itemContent, context)
-        Text(text = "Writer", modifier = Modifier.padding(8.dp))
+        Text(text = "Writer", modifier = Modifier.padding(8.dp), color = Color.Black)
         ScrollableCardView(itemWriter,context)
-        Text(text = "Grammar", modifier = Modifier.padding(8.dp))
+        Text(text = "Grammar", modifier = Modifier.padding(8.dp), color = Color.Black)
         ScrollableCardView(itemGrammar,context)
-        Text(text = "Job Essentials", modifier = Modifier.padding(8.dp))
+        Text(text = "Job Essentials", modifier = Modifier.padding(8.dp), color = Color.Black)
         ScrollableCardView(itemJob,context)
     }
 
 }
 
-@Composable
-fun ScrollableCardView(items: List<String>) {
-    LazyRow {
-        items(
-            items
-        ) { item ->
-            Card(
-                modifier = Modifier
-                    .padding(6.dp)
-                    .size(170.dp, 120.dp)
-                    .clickable {
 
-                    },
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = item, textAlign = TextAlign.Center, fontSize = 14.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun ScrollableCardView(items: List<String>, context: Context) {
@@ -122,21 +114,25 @@ fun ScrollableCardView(items: List<String>, context: Context) {
         items(
             items
         ) { item ->
+            val hexadecimal = "#D2D8EE"
             Card(
                 modifier = Modifier
                     .padding(6.dp)
-                    .size(170.dp, 120.dp)
+                    .size(180.dp, 130.dp)
                     .clickable {
                         val title = ToolData(item).title
-                        Log.d("saif123", title.toString())
                         MySwitchCase(title = title, context = context)
                     },
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                colors = CardColors(containerColor = Color(hexadecimal.toColorInt()), contentColor = Color.Black,
+                    disabledContentColor = Color.Transparent, disabledContainerColor = Color.Transparent)
             ) {
                 Text(
                     text = item, textAlign = TextAlign.Center, fontSize = 14.sp,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(12.dp), color = Color.Black
                 )
+                Image(painter = painterResource(id = ToolIcon(item)), contentDescription = null,
+                    modifier = Modifier.size(80.dp).align(Alignment.End).padding(end = 5.dp, bottom = 5.dp))
             }
         }
     }
@@ -309,5 +305,52 @@ fun ToolsHeader(title: String) {
             )
         }
     )
+}
+fun ToolIcon(title: String):Int {
+    if (title == ToolItem.MailGeneration.title) {
+        return ToolItem.MailGeneration.image
+    } else if (title == ToolItem.BlogGeneration.title) {
+        return ToolItem.BlogGeneration.image
+    } else if (title == ToolItem.BlogSection.title) {
+        return ToolItem.BlogSection.image
+    } else if (title == ToolItem.BlogIdeas.title) {
+        return ToolItem.BlogIdeas.image
+    } else if (title == ToolItem.ParagraphGenerator.title) {
+        return ToolItem.ParagraphGenerator.image
+    } else if (title == ToolItem.GenerateArticle.title) {
+        return ToolItem.GenerateArticle.image
+    } else if (title == ToolItem.CreativeStory.title) {
+        return ToolItem.CreativeStory.image
+    } else if (title == ToolItem.CreativeLetter.title) {
+        return ToolItem.CreativeLetter.image
+    } else if (title == ToolItem.LoveLetter.title) {
+        return ToolItem.LoveLetter.image
+    } else if (title == ToolItem.Poems.title) {
+        return ToolItem.Poems.image
+    } else if (title == ToolItem.SongLyrics.title) {
+        return ToolItem.SongLyrics.image
+    } else if (title == ToolItem.FoodRecipe.title) {
+        return ToolItem.FoodRecipe.image
+    } else if (title == ToolItem.GrammerCorrection.title) {
+        return ToolItem.GrammerCorrection.image
+    } else if (title == ToolItem.AnswerQuestion.title) {
+        return ToolItem.AnswerQuestion.image
+    } else if (title == ToolItem.ActivePassive.title) {
+        return ToolItem.ActivePassive.image
+    } else if (title == ToolItem.PassiveActive.title) {
+        return ToolItem.PassiveActive.image
+    } else if (title == ToolItem.JobDescription.title) {
+        return ToolItem.JobDescription.image
+    } else if (title == ToolItem.Resume.title) {
+        return ToolItem.Resume.image
+    } else if (title == ToolItem.InterviewQuestions.title) {
+        return ToolItem.InterviewQuestions.image
+    } else if (title == ToolItem.TextSummarizer.title) {
+        return ToolItem.TextSummarizer.image
+    } else if (title == ToolItem.StorySummarizer.title) {
+        return ToolItem.StorySummarizer.image
+    } else {
+        return ToolItem.ParagraphSummarizer.image
+    }
 }
 

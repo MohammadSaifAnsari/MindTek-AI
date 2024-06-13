@@ -86,6 +86,9 @@ dependencies {
     //Splash Screen
     implementation(libs.androidx.core.splashscreen)
 
+    // Add the dependency for the Cloud Storage library
+    implementation(libs.firebase.storage)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
