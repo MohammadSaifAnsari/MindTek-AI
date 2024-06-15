@@ -113,7 +113,7 @@ fun ModalChatBox(response: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatHeader(
+fun MainHeader(
     coroutineScope: CoroutineScope,
     drawerState: androidx.compose.material3.DrawerState
 ) {

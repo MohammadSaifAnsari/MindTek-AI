@@ -56,9 +56,9 @@ fun MainBottomNavigation(navController: NavController) {
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemColors(
-                    selectedIconColor = Color.Green,
-                    unselectedIconColor = Color.DarkGray, selectedTextColor = Color.Magenta,
-                    unselectedTextColor = Color.DarkGray, disabledTextColor = Color.LightGray,
+                    selectedIconColor = Color(70, 76, 91, 255),
+                    unselectedIconColor = Color.Gray, selectedTextColor = Color(70, 76, 91, 255),
+                    unselectedTextColor = Color.Gray, disabledTextColor = Color.LightGray,
                     disabledIconColor = Color.LightGray, selectedIndicatorColor = Color.Transparent
                 )
 

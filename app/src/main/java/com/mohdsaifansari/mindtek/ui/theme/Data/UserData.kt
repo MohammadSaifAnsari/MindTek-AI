@@ -12,11 +12,11 @@ data class Date(
     val year: String,
 )
 
-data class loadHistory(
-    val idNo: Int,
-    val prompt: String,
-    val result: String,
-    val day: String,
-    val month: String,
-    val year: String,
+data class LoadHistory(
+    val idNo: Int?,
+    val prompt: String?,
+    val result: String?,
+    val day: String?,
+    val month: String?,
+    val year: String?,
 )

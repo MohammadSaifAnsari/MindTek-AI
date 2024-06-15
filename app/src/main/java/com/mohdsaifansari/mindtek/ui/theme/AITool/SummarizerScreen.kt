@@ -5,16 +5,16 @@ import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.pspdfkit.document.PdfDocument
@@ -24,15 +24,16 @@ import com.pspdfkit.document.PdfDocumentLoader.openDocument
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummarizerHeader(title: String) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
         title = {
             Text(
                 text = title, modifier = Modifier.padding(5.dp),
-                fontStyle = FontStyle.Normal
+                fontStyle = FontStyle.Normal,
+                fontFamily = FontFamily.Serif
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color.Red,
+            containerColor = Color(220, 226, 241, 255),
             titleContentColor = Color.Black,
             actionIconContentColor = Color.Black,
             navigationIconContentColor = Color.Black,
@@ -40,12 +41,6 @@ fun SummarizerHeader(title: String) {
         ), navigationIcon = {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                modifier = Modifier.padding(5.dp),
-                contentDescription = null
-            )
-        }, actions = {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
                 modifier = Modifier.padding(5.dp),
                 contentDescription = null
             )

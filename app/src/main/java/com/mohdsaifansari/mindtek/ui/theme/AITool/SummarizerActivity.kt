@@ -22,14 +22,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -45,9 +46,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,6 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Modal.AIToolViewModal
 import com.mohdsaifansari.mindtek.ui.theme.AITool.ui.theme.MindtekTheme
@@ -137,7 +143,20 @@ class SummarizerActivity : ComponentActivity() {
                 SummarizerHeader(title = title)
             }
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFFDCE2F1), // #dee4f4
+                                Color(0xFFFFFFFF)
+                            ), start = Offset(0f, 0f),
+                            end = Offset(0f, Float.POSITIVE_INFINITY)
+                        )
+                    )
+            ) {
                 Text(
                     text = subtitle,
                     modifier = Modifier
@@ -145,13 +164,20 @@ class SummarizerActivity : ComponentActivity() {
                         .padding(start = 20.dp, end = 20.dp, top = 60.dp, bottom = 20.dp),
                     fontSize = 18.sp,
                     textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif
                 )
-                if (text.isEmpty() && extractedText.value.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.9f)
+                        .padding(start = 20.dp, end = 20.dp)
+                )
+                {
                     OutlinedTextField(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
+                            .padding(top = 8.dp, bottom = 8.dp),
                         value = text,
                         onValueChange = { newText ->
                             text = newText
@@ -161,13 +187,7 @@ class SummarizerActivity : ComponentActivity() {
                         },
                         shape = RoundedCornerShape(16.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(0.9f)
-                            .padding(start = 20.dp, end = 20.dp)
-                    )
-                    {
+                    if (text.isEmpty() && extractedText.value.isEmpty()) {
                         path = uri
 
                         if (path.isNotEmpty()) {
@@ -177,50 +197,28 @@ class SummarizerActivity : ComponentActivity() {
                             path = ""
                         }
                         if (extractedText.value.isNotEmpty()) {
-                            text = extractedText.value
+                            text = extractedText.value.trim()
                             extractedText.value = ""
                         }
-                        IconButton(
+                        FloatingActionButton(
                             onClick = {
                                 launcher.launch("application/pdf")
                             }, modifier = Modifier
-                                .padding(4.dp)
                                 .align(Alignment.Center)
-                                .size(100.dp)
+                                .size(100.dp),
+                            containerColor = Color(160, 166, 181, 255),
+                            shape = CircleShape
                         ) {
                             Icon(
                                 Icons.Default.AddCircle, contentDescription = null,
                                 modifier = Modifier
-                                    .size(90.dp)
-                                    .background(Color.Transparent), tint = Color.Black
+                                    .size(100.dp)
+                                    .background(Color.White), tint = Color(160, 166, 181, 255)
                             )
                         }
-
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(0.9f)
-                            .padding(start = 20.dp, end = 20.dp)
-                    )
-                    {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp, bottom = 8.dp),
-                            value = text,
-                            onValueChange = { newText ->
-                                text = newText
-                            },
-                            placeholder = {
-                                Text(text = "Type a prompt")
-                            },
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                    }
-
                 }
+
                 if (text.isNotEmpty()) {
                     isEnabledButton = true
                 }
@@ -263,11 +261,16 @@ class SummarizerActivity : ComponentActivity() {
                     dragHandle = null, tonalElevation = 100.dp
                 ) {
                     outputMessage = viewmodel.list.toList().toString()
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(220, 226, 241, 255))
+                    ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
+                                .background(Color(220, 226, 241, 255))
                         ) {
                             IconButton(
                                 onClick = {
@@ -296,10 +299,12 @@ class SummarizerActivity : ComponentActivity() {
                                     .align(Alignment.CenterEnd)
                             ) {
                                 Icon(
-                                    Icons.Default.Share, contentDescription = null,
+                                    painter = painterResource(id = R.drawable.copytext),
+                                    contentDescription = null,
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .background(Color.Transparent), tint = Color.Black
+                                        .background(Color.Transparent),
+                                    tint = Color.Black
                                 )
                             }
                         }
@@ -308,6 +313,7 @@ class SummarizerActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
+                                .background(Color(220, 226, 241, 255))
                         ) {
                             IconButton(
                                 onClick = {

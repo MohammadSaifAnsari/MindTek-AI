@@ -8,5 +8,7 @@ sealed class LogInItem(val route: String) {
     object HomeScreen : LogInItem(route = "Home_Screen_nav")
     object ProfileEditNav : LogInItem(route = "Profile_Edit_nav")
     object ProfileEditScreen : LogInItem(route = "Profile_Edit")
+    object ResultNav : LogInItem(route = "Result_nav/{result}")
+    object ResultScreen : LogInItem(route = "Result_Screen")
 
 }

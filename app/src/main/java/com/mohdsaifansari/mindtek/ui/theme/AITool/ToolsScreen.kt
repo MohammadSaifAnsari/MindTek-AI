@@ -21,11 +21,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,6 +36,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,9 +45,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,6 +62,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.ui.theme.AITool.Modal.AIToolViewModal
 
@@ -86,7 +95,20 @@ fun Generation(title: String, subTitle: String, context: Context) {
             ToolsHeader(title)
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFDCE2F1), // #dee4f4
+                            Color(0xFFFFFFFF)
+                        ), start = Offset(0f, 0f),
+                        end = Offset(0f, Float.POSITIVE_INFINITY)
+                    )
+                )
+                .fillMaxSize()
+        ) {
             Text(
                 text = subTitle,
                 modifier = Modifier
@@ -94,7 +116,8 @@ fun Generation(title: String, subTitle: String, context: Context) {
                     .padding(start = 20.dp, end = 20.dp, top = 60.dp, bottom = 20.dp),
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif
             )
             OutlinedTextField(
                 modifier = Modifier
@@ -113,9 +136,10 @@ fun Generation(title: String, subTitle: String, context: Context) {
             if (text.isNotEmpty()) {
                 isEnabledButton = true
             }
-            Button(modifier = Modifier
-                .align(Alignment.End)
-                .padding(end = 20.dp, top = 20.dp),
+            Button(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = 20.dp, top = 20.dp),
                 onClick = {
                     inputText = text
                     text = ""
@@ -147,11 +171,16 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 dragHandle = null, tonalElevation = 100.dp
             ) {
                 outputMessage = viewmodel.list.toList().toString()
-                Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(220, 226, 241, 255))
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
+                            .background(Color(220, 226, 241, 255))
                     ) {
                         IconButton(
                             onClick = {
@@ -176,10 +205,12 @@ fun Generation(title: String, subTitle: String, context: Context) {
                                 .align(Alignment.CenterEnd)
                         ) {
                             Icon(
-                                Icons.Default.Share, contentDescription = null,
+                                painter = painterResource(id = R.drawable.copytext),
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .background(Color.Transparent), tint = Color.Black
+                                    .background(Color.Transparent),
+                                tint = Color.Black
                             )
                         }
                     }
@@ -189,6 +220,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
+                            .background(Color(220, 226, 241, 255))
                     ) {
                         IconButton(
                             onClick = {
@@ -229,7 +261,11 @@ fun SheetContentScreen(getResponse: String) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.9f),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        colors = CardColors(
+            containerColor = Color.White, contentColor = Color.Black,
+            disabledContainerColor = Color.White, disabledContentColor = Color.Black
+        )
     ) {
         Text(
             text = getResponse, textAlign = TextAlign.Justify, fontSize = 14.sp,
@@ -240,6 +276,32 @@ fun SheetContentScreen(getResponse: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ToolsHeader(title: String) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title, modifier = Modifier.padding(5.dp),
+                fontStyle = FontStyle.Normal,
+                fontFamily = FontFamily.Serif
+            )
+        },
+        colors = TopAppBarColors(
+            containerColor = Color(220, 226, 241, 255),
+            titleContentColor = Color.Black,
+            actionIconContentColor = Color.Black,
+            navigationIconContentColor = Color.Black,
+            scrolledContainerColor = Color.White
+        ), navigationIcon = {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                modifier = Modifier.padding(5.dp),
+                contentDescription = null
+            )
+        }
+    )
+}
 
 fun PromptCase(title: String): String {
     if (title == ToolItem.MailGeneration.title) {

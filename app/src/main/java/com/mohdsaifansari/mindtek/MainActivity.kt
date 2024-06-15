@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,9 +40,9 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +50,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -75,9 +78,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatHeader
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatUiState
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatViewModel
+import com.mohdsaifansari.mindtek.ui.theme.ChatBot.MainHeader
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ModalChatBox
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserChatBox
 import com.mohdsaifansari.mindtek.ui.theme.Components.BottomNavItem
@@ -159,6 +162,14 @@ class MainActivity : ComponentActivity() {
                             EditProfile(firebaseAuth, firestore, context, imagePicker, uriState)
                         }
                     }
+                    navigation(
+                        startDestination = LogInItem.ResultScreen.route,
+                        route = LogInItem.ResultNav.route
+                    ) {
+                        composable(LogInItem.ResultScreen.route) {
+                            ResultScreen(navControllerSign, context)
+                        }
+                    }
 
                 }
             }
@@ -171,7 +182,6 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         val coroutineScope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val context = LocalContext.current.applicationContext
         val profileData = getUserData(firebaseAuth, firestore, context)
 
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
@@ -243,7 +253,7 @@ class MainActivity : ComponentActivity() {
             }
         }) {
             Scaffold(topBar = {
-                ChatHeader(coroutineScope, drawerState)
+                MainHeader(coroutineScope, drawerState)
             }, bottomBar = {
                 MainBottomNavigation(navController = navController)
             }) { innerPadding ->
@@ -274,7 +284,7 @@ class MainActivity : ComponentActivity() {
                 ChatScreen(paddingValues = padding)
             }
             composable(BottomNavItem.History.route) {
-                ToolHistory(paddingValues = padding, context)
+                ToolHistory(paddingValues = padding, context, navControllerSign)
             }
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(paddingValues = padding, auth, firestore, navControllerSign, context)
@@ -305,7 +315,16 @@ class MainActivity : ComponentActivity() {
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFDCE2F1), // #dee4f4
+                            Color(0xFFFFFFFF)
+                        ), start = Offset(0f, 0f),
+                        end = Offset(0f, Float.POSITIVE_INFINITY)
+                    )
+                ),
             verticalArrangement = Arrangement.Bottom
         ) {
             LazyColumn(
@@ -346,29 +365,31 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     Spacer(modifier = Modifier.width(2.dp))
-                    Icon(
-                        imageVector = Icons.Rounded.AddCircle,
-                        contentDescription = "add photo",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                imagePicker.launch(
-                                    PickVisualMediaRequest
-                                        .Builder()
-                                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        .build()
-                                )
-                            }, tint = MaterialTheme.colorScheme.primary
-                    )
+
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                TextField(
+                OutlinedTextField(
                     modifier = Modifier.weight(1f),
                     value = chatState.prompt, onValueChange = {
                         chatViewModel.onEvent(ChatUiState.UpdatePrompt(it))
                     },
                     placeholder = {
                         Text(text = "Type a prompt")
+                    }, trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.AddCircle,
+                            contentDescription = "add photo",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable {
+                                    imagePicker.launch(
+                                        PickVisualMediaRequest
+                                            .Builder()
+                                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            .build()
+                                    )
+                                }, tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -376,7 +397,7 @@ class MainActivity : ComponentActivity() {
                     imageVector = Icons.Rounded.Send,
                     contentDescription = "send message",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(35.dp)
                         .clickable {
                             chatViewModel.onEvent(ChatUiState.SendPrompt(chatState.prompt, bitmap))
                             uriState.update { "" }
