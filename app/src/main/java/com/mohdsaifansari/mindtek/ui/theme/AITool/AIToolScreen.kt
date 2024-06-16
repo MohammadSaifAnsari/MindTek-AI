@@ -25,6 +25,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,19 +92,44 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(text = "Summarizer", modifier = Modifier.padding(8.dp), color = Color.Black)
+            Text(
+                text = "Summarizer",
+                modifier = Modifier.padding(8.dp),
+                color = Color.Black,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold
+            )
             ScrollableCardView(itemSummarizer, context)
             Text(
                 text = "Content Writing Tools",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black
+                color = Color.Black,
+                fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold
             )
             ScrollableCardView(itemContent, context)
-            Text(text = "Writer", modifier = Modifier.padding(8.dp), color = Color.Black)
+            Text(
+                text = "Writer",
+                modifier = Modifier.padding(8.dp),
+                color = Color.Black,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold
+            )
             ScrollableCardView(itemWriter, context)
-            Text(text = "Grammar", modifier = Modifier.padding(8.dp), color = Color.Black)
+            Text(
+                text = "Grammar",
+                modifier = Modifier.padding(8.dp),
+                color = Color.Black,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold
+            )
             ScrollableCardView(itemGrammar, context)
-            Text(text = "Job Essentials", modifier = Modifier.padding(8.dp), color = Color.Black)
+            Text(
+                text = "Job Essentials",
+                modifier = Modifier.padding(8.dp),
+                color = Color.Black,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold
+            )
             ScrollableCardView(itemJob, context)
         }
     }
@@ -135,8 +162,12 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                 )
             ) {
                 Text(
-                    text = item, textAlign = TextAlign.Center, fontSize = 14.sp,
-                    modifier = Modifier.padding(12.dp), color = Color.Black
+                    text = item,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(12.dp),
+                    color = Color.Black,
+                    fontFamily = FontFamily.Serif
                 )
                 Image(
                     painter = painterResource(id = ToolIcon(item)), contentDescription = null,

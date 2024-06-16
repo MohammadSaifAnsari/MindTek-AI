@@ -37,49 +37,38 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserChatBox(prompt: String, bitmap: Bitmap?) {
     Column(
-        modifier = Modifier.padding(start = 100.dp, bottom = 22.dp, top = 22.dp)
+        modifier = Modifier.padding(start = 100.dp, bottom = 11.dp, top = 22.dp)
     ) {
-        bitmap?.let {
-            Card(
-                shape = RoundedCornerShape(8.dp),
-                colors = CardColors(
-                    MaterialTheme.colorScheme.primary,
-                    Color.Black,
-                    Color.Transparent,
-                    Color.Transparent
-                ),
-                modifier = Modifier.padding(bottom = 11.dp)
-            ) {
+
+        Card(
+            shape = RoundedCornerShape(8.dp),
+            colors = CardColors(
+                containerColor = Color(140, 149, 192, 255),
+                contentColor = Color.Black,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = Color.Transparent
+            ),
+            modifier = Modifier.padding(bottom = 22.dp)
+        ) {
+            bitmap?.let {
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(260.dp)
+                        .padding(bottom = 6.dp, top = 4.dp, start = 4.dp, end = 4.dp)
                         .clip(RoundedCornerShape(8.dp)),
                     contentDescription = "image",
                     contentScale = ContentScale.Crop,
                     bitmap = it.asImageBitmap()
                 )
             }
-
-        }
-
-        Card(
-            shape = RoundedCornerShape(8.dp),
-            colors = CardColors(
-                MaterialTheme.colorScheme.primary,
-                Color.Black,
-                Color.Transparent,
-                Color.Transparent
-            ),
-            modifier = Modifier.padding(bottom = 22.dp)
-        ) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(bottom = 12.dp, top = 4.dp, start = 12.dp, end = 12.dp)
                     .background(Color.Transparent)
                     .clip(RoundedCornerShape(12.dp)),
-                text = prompt, fontSize = 18.sp, color = MaterialTheme.colorScheme.onPrimary
+                text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -90,20 +79,20 @@ fun ModalChatBox(response: String) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardColors(
-            MaterialTheme.colorScheme.tertiary,
-            Color.Black,
-            Color.Transparent,
-            Color.Transparent
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = Color.Transparent
         ),
         modifier = Modifier.padding(start = 8.dp, end = 100.dp, bottom = 22.dp)
     ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(12.dp)
                 .background(Color.Transparent)
                 .clip(RoundedCornerShape(12.dp)),
-            text = response, fontSize = 18.sp, color = MaterialTheme.colorScheme.onTertiary
+            text = response, fontSize = 15.sp, color = Color.Black
         )
     }
 

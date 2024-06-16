@@ -20,3 +20,9 @@ data class LoadHistory(
     val month: String?,
     val year: String?,
 )
+
+data class DrawerItem(
+    val icon:Int,
+    val title: String
+
+)

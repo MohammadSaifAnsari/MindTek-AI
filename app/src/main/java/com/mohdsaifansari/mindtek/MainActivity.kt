@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.DrawerValue
@@ -57,6 +58,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,7 +89,10 @@ import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserChatBox
 import com.mohdsaifansari.mindtek.ui.theme.Components.BottomNavItem
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
 import com.mohdsaifansari.mindtek.ui.theme.Components.MainBottomNavigation
+import com.mohdsaifansari.mindtek.ui.theme.Data.DrawerItem
+import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
+import com.mohdsaifansari.mindtek.ui.theme.ProfilePicture
 import com.mohdsaifansari.mindtek.ui.theme.ProfileScreen
 import com.mohdsaifansari.mindtek.ui.theme.getUserData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -184,72 +190,80 @@ class MainActivity : ComponentActivity() {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val profileData = getUserData(firebaseAuth, firestore, context)
 
+        val drawerItemList = listOf(DrawerItem(R.drawable.setting, "Setting"),
+            DrawerItem(R.drawable.helpcenter, "Help and Feedback"), DrawerItem(R.drawable.logout, "Logout"))
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
             ModalDrawerSheet(drawerContainerColor = Color.White, drawerContentColor = Color.Black) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFFDCE2F1), // #dee4f4
+                                    Color(0xFFFFFFFF)
+                                ), start = Offset(0f, 0f),
+                                end = Offset(0f, Float.POSITIVE_INFINITY)
+                            )
+                        )
                 ) {
                     Spacer(modifier = Modifier.height(50.dp))
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        modifier = Modifier
-                            .padding(start = 14.dp, bottom = 2.dp)
-                            .size(90.dp),
-                        contentDescription = null
-                    )
+                    ProfilePicture(context = context, profileKey = ProfilePhotoKey.NavDrawerPhotoKey.name)
                     Text(
-                        text = profileData.firstName + profileData.lastName,
-                        modifier = Modifier.padding(start = 20.dp, top = 2.dp),
+                        text = profileData.firstName +" "+ profileData.lastName,
+                        modifier = Modifier.padding(start = 22.dp, top = 2.dp),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
+                        color = Color.Black, fontFamily = FontFamily.Serif
                     )
                     Text(
                         text = profileData.email,
-                        modifier = Modifier.padding(start = 20.dp, top = 2.dp),
+                        modifier = Modifier.padding(start = 22.dp, top = 2.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Normal,
                         color = Color.Black
                     )
                 }
                 HorizontalDivider()
-                NavigationDrawerItem(
-                    label = { Text(text = "Setting") },
-                    selected = false,
-                    onClick = {
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                NavigationDrawerItem(
-                    label = { Text(text = "Help and Feedback") },
-                    selected = false,
-                    onClick = {
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                NavigationDrawerItem(
-                    label = { Text(text = "Logout") },
-                    selected = false,
-                    onClick = {
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                        firebaseAuth.signOut()
-                        navControllerSign.navigate(LogInItem.AuthScreen.route) {
-                            popUpTo(LogInItem.HomeScreen.route) {
-                                inclusive = true
+                drawerItemList.forEach{item ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    NavigationDrawerItem(
+                        label = {
+                            Text(text = item.title,
+                                color = if (item.title == "Logout") Color.Red else Color.Black,
+                                fontFamily = FontFamily.Serif)
+                                },
+                        selected = false,
+                        onClick = {
+                            coroutineScope.launch {
+                                drawerState.close()
                             }
-                            launchSingleTop = true
-                            restoreState = true
+                            if (item.title == "Logout") {
+                                firebaseAuth.signOut()
+                                navControllerSign.navigate(LogInItem.AuthScreen.route) {
+                                    popUpTo(LogInItem.HomeScreen.route) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.White,
+                            selectedContainerColor = Color(220, 226, 241, 255)),
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = item.icon),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .background(Color.Transparent)
+                                    .size(24.dp),
+                                tint = if (item.title == "Logout") Color.Red else Color.Black
+                            )
                         }
-                    }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
+                    )
+                }
             }
         }) {
             Scaffold(topBar = {
@@ -388,20 +402,21 @@ class MainActivity : ComponentActivity() {
                                             .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                             .build()
                                     )
-                                }, tint = MaterialTheme.colorScheme.primary
+                                }, tint = Color(140, 149, 192, 255)
                         )
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
-                    imageVector = Icons.Rounded.Send,
+                    painter = painterResource(id = R.drawable.sendcircleicon),
                     contentDescription = "send message",
                     modifier = Modifier
-                        .size(35.dp)
+                        .size(40.dp)
                         .clickable {
                             chatViewModel.onEvent(ChatUiState.SendPrompt(chatState.prompt, bitmap))
                             uriState.update { "" }
-                        }, tint = MaterialTheme.colorScheme.primary
+                        }
+                        .background(Color.Transparent), tint = Color(140, 149, 192, 255)
                 )
             }
         }

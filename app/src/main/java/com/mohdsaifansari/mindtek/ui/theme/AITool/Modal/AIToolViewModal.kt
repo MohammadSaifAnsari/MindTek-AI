@@ -13,7 +13,7 @@ class AIToolViewModal : ViewModel() {
     }
     private val genAi by lazy {
         GenerativeModel(
-            modelName = "gemini-pro",
+            modelName = "gemini-1.5-flash",
             apiKey = Apikey
 
         )
@@ -26,5 +26,6 @@ class AIToolViewModal : ViewModel() {
             fullResponse += chunk.text
 
         }
+
     }
 }

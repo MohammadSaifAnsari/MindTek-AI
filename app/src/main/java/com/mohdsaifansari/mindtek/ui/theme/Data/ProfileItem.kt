@@ -9,3 +9,8 @@ sealed class ProfileItem(val name: String, val painter: Int) {
     object AboutMindtek : ProfileItem(name = "About Mindtek", painter = R.drawable.about)
     object Logout : ProfileItem(name = "Logout", painter = R.drawable.logout)
 }
+
+sealed class ProfilePhotoKey(val name:String){
+    object ProfileScreenPhotoKey : ProfilePhotoKey(name = "Profile Screen")
+    object NavDrawerPhotoKey : ProfilePhotoKey(name = "Nav Drawer Screen")
+}

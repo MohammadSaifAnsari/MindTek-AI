@@ -60,6 +60,7 @@ import coil.size.Size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.ui.theme.ProfilePicture
 import com.mohdsaifansari.mindtek.ui.theme.getUserData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -156,7 +157,7 @@ fun MainContentEditProfile(
                         bitmap = it.asImageBitmap()
                     )
                 } else {
-                    ProfilePicture(context = context)
+                    ProfilePicture(context = context, profileKey = ProfilePhotoKey.ProfileScreenPhotoKey.name)
                 }
             }
 

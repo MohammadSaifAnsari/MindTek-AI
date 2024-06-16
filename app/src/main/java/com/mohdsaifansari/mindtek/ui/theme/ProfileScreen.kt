@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.ProfileItem
+import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.ui.theme.Data.UserData
 import okio.IOException
 import java.io.File
@@ -65,7 +68,7 @@ fun ProfileScreen(
     context: Context
 ) {
     val profileData = getUserData(firebaseAuth, firestore, context)
-    val ProfileItemlist = listOf(
+    val profileItemlist = listOf(
         "Personal info",
         "Help Center",
         "Privacy Policy",
@@ -100,7 +103,10 @@ fun ProfileScreen(
                 .size(120.dp)
                 .clip(CircleShape)
         ) {
-            ProfilePicture(context = context)
+            ProfilePicture(
+                context = context,
+                profileKey = ProfilePhotoKey.ProfileScreenPhotoKey.name
+            )
         }
         //Name
         Text(
@@ -122,7 +128,7 @@ fun ProfileScreen(
                 .height(80.dp)
         )
 
-        ProfileItemRow(navController, firebaseAuth = firebaseAuth, items = ProfileItemlist)
+        ProfileItemRow(navController, firebaseAuth = firebaseAuth, items = profileItemlist)
     }
 }
 
@@ -236,7 +242,7 @@ fun getUserData(
 }
 
 @Composable
-fun ProfilePicture(context: Context) {
+fun ProfilePicture(context: Context, profileKey: String) {
     var bitmapState by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(Unit) {
@@ -244,28 +250,61 @@ fun ProfilePicture(context: Context) {
             bitmapState = bitmap
         }
     }
+    if (profileKey == ProfilePhotoKey.ProfileScreenPhotoKey.name) {
+        if (bitmapState != null) {
+            Image(
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(bottom = 2.dp)
+                    .clip(CircleShape),
+                contentDescription = "picked profile image",
+                contentScale = ContentScale.Crop,
+                bitmap = bitmapState!!.asImageBitmap()
+            )
+        } else {
+            Image(
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(bottom = 2.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Fit,
+                painter = painterResource(id = R.drawable.personicon),
+                contentDescription = null
+            )
+        }
+    } else if (profileKey == ProfilePhotoKey.NavDrawerPhotoKey.name) {
+        if (bitmapState != null) {
+            Row {
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(bottom = 2.dp)
+                        .clip(CircleShape),
+                    contentDescription = "picked profile image",
+                    contentScale = ContentScale.Crop,
+                    bitmap = bitmapState!!.asImageBitmap()
+                )
+            }
 
-    if (bitmapState != null) {
-        Image(
-            modifier = Modifier
-                .size(120.dp)
-                .padding(bottom = 2.dp)
-                .clip(CircleShape),
-            contentDescription = "picked profile image",
-            contentScale = ContentScale.Crop,
-            bitmap = bitmapState!!.asImageBitmap()
-        )
-    } else {
-        Image(
-            modifier = Modifier
-                .size(120.dp)
-                .padding(bottom = 2.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Fit,
-            painter = painterResource(id = R.drawable.personicon),
-            contentDescription = null
-        )
+        } else {
+            Row {
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(bottom = 2.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Fit,
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = null
+                )
+            }
+
+        }
     }
+
+
 }
 
 fun retrieveProfilePicture(context: Context, onBitmapRetrieved: (Bitmap?) -> Unit) {
