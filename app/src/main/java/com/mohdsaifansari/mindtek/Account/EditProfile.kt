@@ -1,9 +1,7 @@
-package com.mohdsaifansari.mindtek
+package com.mohdsaifansari.mindtek.Account
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -57,33 +55,29 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.mohdsaifansari.mindtek.Database.DatabaseProvider
+import com.mohdsaifansari.mindtek.Database.UserDatabase
 import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
-import com.mohdsaifansari.mindtek.ui.theme.ProfilePicture
-import com.mohdsaifansari.mindtek.ui.theme.getUserData
 import kotlinx.coroutines.flow.MutableStateFlow
 
 
 @Composable
 fun EditProfile(
-    firebaseAuth: FirebaseAuth,
-    firestore: FirebaseFirestore,
     context: Context,
     imagePicker: ActivityResultLauncher<PickVisualMediaRequest>,
-    uriState: MutableStateFlow<String>
+    uriState: MutableStateFlow<String>,
+    viewModel: ProfileViewModel,
+    db: UserDatabase
 ) {
     Scaffold(topBar = {
         EditProfileHeader()
     }) { innerPadding ->
         MainContentEditProfile(
             innerPadding,
-            firebaseAuth,
-            firestore,
             context,
             imagePicker,
-            uriState
+            uriState,
+            viewModel, db
         )
     }
 }
@@ -92,14 +86,16 @@ fun EditProfile(
 @Composable
 fun MainContentEditProfile(
     paddingValues: PaddingValues,
-    firebaseAuth: FirebaseAuth,
-    firestore: FirebaseFirestore,
     context: Context,
     imagePicker: ActivityResultLauncher<PickVisualMediaRequest>,
-    uriState: MutableStateFlow<String>
+    uriState: MutableStateFlow<String>,
+    viewModel: ProfileViewModel,
+    db: UserDatabase
 ) {
+    val profileData by viewModel.userData.collectAsState()
     val bitmap = getProfileBitmap(uriState = uriState)
-    val profileData = getUserData(firebaseAuth, firestore, context)
+
+
     var firstNametext by remember {
         mutableStateOf("")
     }
@@ -108,8 +104,12 @@ fun MainContentEditProfile(
     }
 
     if ((firstNametext == "") && (lastNametext == "")) {
-        firstNametext = profileData.firstName
-        lastNametext = profileData.lastName
+        viewModel.checkUserData(context = context, db = DatabaseProvider.userDatabase)
+        profileData?.let {
+            firstNametext = it.firstName
+            lastNametext = it.lastName
+        }
+
     }
     Column(
         modifier = Modifier
@@ -157,7 +157,10 @@ fun MainContentEditProfile(
                         bitmap = it.asImageBitmap()
                     )
                 } else {
-                    ProfilePicture(context = context, profileKey = ProfilePhotoKey.ProfileScreenPhotoKey.name)
+                    ProfilePicture(
+                        viewModel = viewModel,
+                        profileKey = ProfilePhotoKey.ProfileScreenPhotoKey.name
+                    )
                 }
             }
 
@@ -232,8 +235,8 @@ fun MainContentEditProfile(
         val uri = uriState.collectAsState().value.toUri()
         Button(
             onClick = {
-                updateProfileData(firestore, firebaseAuth, firstNametext, lastNametext, context)
-                uploadProfilePicture(context = context, uri = uri)
+                viewModel.updateProfileData(firstNametext, lastNametext, context, db)
+                viewModel.uploadProfilePicture(context = context, uri = uri, db)
             },
             modifier = Modifier
                 .fillMaxWidth(0.7f)
@@ -294,46 +297,3 @@ fun getProfileBitmap(uriState: MutableStateFlow<String>): Bitmap? {
     return null
 }
 
-fun updateProfileData(
-    firestore: FirebaseFirestore,
-    firebaseAuth: FirebaseAuth,
-    firstName: String,
-    lastName: String,
-    context: Context
-) {
-    val uid = firebaseAuth.currentUser?.uid.toString()
-
-    val userProfile = hashMapOf<String, Any>(
-        "First Name" to firstName,
-        "Last Name" to lastName
-    )
-    firestore.collection("Users").document(uid)
-        .update(userProfile)
-        .addOnSuccessListener {
-        }.addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Something went wrong while updating name",
-                Toast.LENGTH_SHORT
-            ).show();
-        }
-}
-
-fun uploadProfilePicture(context: Context, uri: Uri) {
-    val firebaseStorage = FirebaseStorage.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
-
-    val uid = firebaseAuth.currentUser?.uid.toString()
-    var storageReference = firebaseStorage.getReference()
-    val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
-
-    profilePhoto.putFile(uri).addOnSuccessListener {
-        Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
-    }.addOnFailureListener {
-        Toast.makeText(
-            context,
-            "Something went wrong while uploading profile photo",
-            Toast.LENGTH_SHORT
-        ).show();
-    }
-}

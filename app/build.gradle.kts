@@ -4,6 +4,8 @@ plugins {
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
 
+    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -88,6 +90,15 @@ dependencies {
 
     // Add the dependency for the Cloud Storage library
     implementation(libs.firebase.storage)
+
+
+
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    // To use Kotlin Symbol Processing (KSP)
+    ksp(libs.androidx.room.compiler)
+    // Kotlin Extensions and Coroutines support for Room
+    implementation(libs.androidx.room.ktx)
 
 
     testImplementation(libs.junit)

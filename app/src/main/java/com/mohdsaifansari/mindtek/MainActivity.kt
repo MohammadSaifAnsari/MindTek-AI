@@ -29,14 +29,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.AddCircle
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -47,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,8 +75,8 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.mohdsaifansari.mindtek.Account.EditProfile
 import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatUiState
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatViewModel
@@ -92,9 +89,10 @@ import com.mohdsaifansari.mindtek.ui.theme.Components.MainBottomNavigation
 import com.mohdsaifansari.mindtek.ui.theme.Data.DrawerItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
-import com.mohdsaifansari.mindtek.ui.theme.ProfilePicture
-import com.mohdsaifansari.mindtek.ui.theme.ProfileScreen
-import com.mohdsaifansari.mindtek.ui.theme.getUserData
+import com.mohdsaifansari.mindtek.Account.ProfilePicture
+import com.mohdsaifansari.mindtek.Account.ProfileScreen
+import com.mohdsaifansari.mindtek.Account.ProfileViewModel
+import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -115,7 +113,6 @@ class MainActivity : ComponentActivity() {
     val context = this@MainActivity
     private val auth: FirebaseAuth by lazy { Firebase.auth }
     val firebaseAuth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,6 +129,8 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             MindtekTheme {
+                DatabaseProvider.initialize(this@MainActivity)
+                val viewModel: ProfileViewModel = viewModel()
                 val navControllerSign = rememberNavController()
                 NavHost(
                     navController = navControllerSign,
@@ -165,7 +164,13 @@ class MainActivity : ComponentActivity() {
                         route = LogInItem.ProfileEditNav.route
                     ) {
                         composable(LogInItem.ProfileEditScreen.route) {
-                            EditProfile(firebaseAuth, firestore, context, imagePicker, uriState)
+                            EditProfile(
+                                context,
+                                imagePicker,
+                                uriState,
+                                viewModel,
+                                db = DatabaseProvider.userDatabase
+                            )
                         }
                     }
                     navigation(
@@ -188,10 +193,16 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         val coroutineScope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val profileData = getUserData(firebaseAuth, firestore, context)
 
-        val drawerItemList = listOf(DrawerItem(R.drawable.setting, "Setting"),
-            DrawerItem(R.drawable.helpcenter, "Help and Feedback"), DrawerItem(R.drawable.logout, "Logout"))
+        val viewModel: ProfileViewModel = viewModel()
+        val profileData by viewModel.userData.collectAsState()
+
+
+        val drawerItemList = listOf(
+            DrawerItem(R.drawable.setting, "Setting"),
+            DrawerItem(R.drawable.helpcenter, "Help and Feedback"),
+            DrawerItem(R.drawable.logout, "Logout")
+        )
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
             ModalDrawerSheet(drawerContainerColor = Color.White, drawerContentColor = Color.Black) {
                 Column(
@@ -209,31 +220,39 @@ class MainActivity : ComponentActivity() {
                         )
                 ) {
                     Spacer(modifier = Modifier.height(50.dp))
-                    ProfilePicture(context = context, profileKey = ProfilePhotoKey.NavDrawerPhotoKey.name)
-                    Text(
-                        text = profileData.firstName +" "+ profileData.lastName,
-                        modifier = Modifier.padding(start = 22.dp, top = 2.dp),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Black, fontFamily = FontFamily.Serif
+                    ProfilePicture(
+                        viewModel = viewModel,
+                        profileKey = ProfilePhotoKey.NavDrawerPhotoKey.name
                     )
-                    Text(
-                        text = profileData.email,
-                        modifier = Modifier.padding(start = 22.dp, top = 2.dp),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = Color.Black
-                    )
+
+                    profileData?.let {
+                        Text(
+                            text = it.firstName + " " + it.lastName,
+                            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black, fontFamily = FontFamily.Serif
+                        )
+                        Text(
+                            text = it.email,
+                            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black
+                        )
+                    }
                 }
                 HorizontalDivider()
-                drawerItemList.forEach{item ->
+                drawerItemList.forEach { item ->
                     Spacer(modifier = Modifier.height(4.dp))
                     NavigationDrawerItem(
                         label = {
-                            Text(text = item.title,
+                            Text(
+                                text = item.title,
                                 color = if (item.title == "Logout") Color.Red else Color.Black,
-                                fontFamily = FontFamily.Serif)
-                                },
+                                fontFamily = FontFamily.Serif
+                            )
+                        },
                         selected = false,
                         onClick = {
                             coroutineScope.launch {
@@ -250,8 +269,10 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.White,
-                            selectedContainerColor = Color(220, 226, 241, 255)),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.White,
+                            selectedContainerColor = Color(220, 226, 241, 255)
+                        ),
                         icon = {
                             Icon(
                                 painter = painterResource(id = item.icon),
@@ -275,7 +296,8 @@ class MainActivity : ComponentActivity() {
                     navHostController = navController,
                     innerPadding,
                     context,
-                    navControllerSign
+                    navControllerSign,
+                    viewModel
                 )
             }
         }
@@ -287,7 +309,8 @@ class MainActivity : ComponentActivity() {
         navHostController: NavHostController,
         padding: PaddingValues,
         context: Context,
-        navControllerSign: NavController
+        navControllerSign: NavController,
+        viewModel: ProfileViewModel
     ) {
         NavHost(navController = navHostController, startDestination = BottomNavItem.AItools.route)
         {
@@ -301,7 +324,13 @@ class MainActivity : ComponentActivity() {
                 ToolHistory(paddingValues = padding, context, navControllerSign)
             }
             composable(BottomNavItem.Profile.route) {
-                ProfileScreen(paddingValues = padding, auth, firestore, navControllerSign, context)
+                ProfileScreen(
+                    paddingValues = padding,
+                    auth,
+                    navControllerSign,
+                    context,
+                    viewModel
+                )
             }
         }
     }

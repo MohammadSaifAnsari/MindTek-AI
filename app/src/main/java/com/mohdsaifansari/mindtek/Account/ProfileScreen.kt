@@ -1,10 +1,6 @@
-package com.mohdsaifansari.mindtek.ui.theme
+package com.mohdsaifansari.mindtek.Account
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,11 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,26 +41,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
-import com.mohdsaifansari.mindtek.ui.theme.Data.ProfileItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
-import com.mohdsaifansari.mindtek.ui.theme.Data.UserData
-import okio.IOException
-import java.io.File
 
 
 @Composable
 fun ProfileScreen(
     paddingValues: PaddingValues,
     firebaseAuth: FirebaseAuth,
-    firestore: FirebaseFirestore,
     navController: NavController,
-    context: Context
+    context: Context,
+    viewModel: ProfileViewModel
 ) {
-    val profileData = getUserData(firebaseAuth, firestore, context)
+
+    val profileData by viewModel.userData.collectAsState()
+
     val profileItemlist = listOf(
         "Personal info",
         "Help Center",
@@ -75,6 +65,10 @@ fun ProfileScreen(
         "About Mindtek",
         "Logout"
     )
+
+    viewModel.checkUserData(context = context, db = DatabaseProvider.userDatabase)
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,37 +98,50 @@ fun ProfileScreen(
                 .clip(CircleShape)
         ) {
             ProfilePicture(
-                context = context,
+                viewModel,
                 profileKey = ProfilePhotoKey.ProfileScreenPhotoKey.name
             )
         }
-        //Name
-        Text(
-            text = profileData.firstName + profileData.lastName,
-            fontWeight = FontWeight.Bold,
-            fontSize = 25.sp,
-            modifier = Modifier.padding(5.dp),
-            fontFamily = FontFamily.Serif
-        )
-        //Email
-        Text(
-            text = profileData.email, fontWeight = FontWeight.Light, fontSize = 15.sp,
-            modifier = Modifier.padding(bottom = 14.dp),
-            fontFamily = FontFamily.SansSerif
-        )
+        profileData?.let {
+            //Name
+            Text(
+                text = it.firstName + " " + it.lastName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                modifier = Modifier.padding(5.dp),
+                fontFamily = FontFamily.Serif
+            )
+            //Email
+            Text(
+                text = it.email, fontWeight = FontWeight.Light, fontSize = 15.sp,
+                modifier = Modifier.padding(bottom = 14.dp),
+                fontFamily = FontFamily.SansSerif
+            )
+        }
+
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
         )
 
-        ProfileItemRow(navController, firebaseAuth = firebaseAuth, items = profileItemlist)
+        ProfileItemRow(
+            navController,
+            firebaseAuth = firebaseAuth,
+            items = profileItemlist,
+            viewModel = viewModel
+        )
     }
 }
 
 
 @Composable
-fun ProfileItemRow(navController: NavController, firebaseAuth: FirebaseAuth, items: List<String>) {
+fun ProfileItemRow(
+    navController: NavController,
+    firebaseAuth: FirebaseAuth,
+    items: List<String>,
+    viewModel: ProfileViewModel
+) {
     for (item in items) {
         Row(
             modifier = Modifier
@@ -172,7 +179,7 @@ fun ProfileItemRow(navController: NavController, firebaseAuth: FirebaseAuth, ite
                 horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
-                    painter = painterResource(id = profileItemIcon(item)),
+                    painter = painterResource(id = viewModel.profileItemIcon(item)),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -215,43 +222,10 @@ fun ProfileItemRow(navController: NavController, firebaseAuth: FirebaseAuth, ite
 }
 
 @Composable
-fun getUserData(
-    firebaseAuth: FirebaseAuth,
-    firestore: FirebaseFirestore,
-    context: Context
-): UserData {
-    var firstUserName by remember {
-        mutableStateOf("")
-    }
-    var lastUserName by remember {
-        mutableStateOf("")
-    }
-    var curUserEmail by remember {
-        mutableStateOf("")
-    }
-
-    firestore.collection("Users").document(firebaseAuth.currentUser?.uid.toString()).get()
-        .addOnSuccessListener { documentSnapshot ->
-            firstUserName = documentSnapshot.getString("First Name").toString();
-            lastUserName = documentSnapshot.getString("Last Name").toString();
-            curUserEmail = documentSnapshot.getString("Email").toString();
-        }.addOnFailureListener {
-            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
-        }
-    return UserData(firstUserName, lastUserName, curUserEmail)
-}
-
-@Composable
-fun ProfilePicture(context: Context, profileKey: String) {
-    var bitmapState by remember { mutableStateOf<Bitmap?>(null) }
-
-    LaunchedEffect(Unit) {
-        retrieveProfilePicture(context) { bitmap ->
-            bitmapState = bitmap
-        }
-    }
+fun ProfilePicture(viewModel: ProfileViewModel, profileKey: String) {
+    val profilePictureBitmap by viewModel.profilePictureBitmap.collectAsState()
     if (profileKey == ProfilePhotoKey.ProfileScreenPhotoKey.name) {
-        if (bitmapState != null) {
+        if (profilePictureBitmap != null) {
             Image(
                 modifier = Modifier
                     .size(120.dp)
@@ -259,7 +233,7 @@ fun ProfilePicture(context: Context, profileKey: String) {
                     .clip(CircleShape),
                 contentDescription = "picked profile image",
                 contentScale = ContentScale.Crop,
-                bitmap = bitmapState!!.asImageBitmap()
+                bitmap = profilePictureBitmap!!.asImageBitmap()
             )
         } else {
             Image(
@@ -273,7 +247,7 @@ fun ProfilePicture(context: Context, profileKey: String) {
             )
         }
     } else if (profileKey == ProfilePhotoKey.NavDrawerPhotoKey.name) {
-        if (bitmapState != null) {
+        if (profilePictureBitmap != null) {
             Row {
                 Spacer(modifier = Modifier.width(16.dp))
                 Image(
@@ -283,7 +257,7 @@ fun ProfilePicture(context: Context, profileKey: String) {
                         .clip(CircleShape),
                     contentDescription = "picked profile image",
                     contentScale = ContentScale.Crop,
-                    bitmap = bitmapState!!.asImageBitmap()
+                    bitmap = profilePictureBitmap!!.asImageBitmap()
                 )
             }
 
@@ -307,41 +281,6 @@ fun ProfilePicture(context: Context, profileKey: String) {
 
 }
 
-fun retrieveProfilePicture(context: Context, onBitmapRetrieved: (Bitmap?) -> Unit) {
-    val firebaseStorage = FirebaseStorage.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
-
-    val uid = firebaseAuth.currentUser?.uid.toString()
-    val storageReference = firebaseStorage.getReference()
-    val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
-
-    try {
-        val file = File.createTempFile("Profile Photo", ".png")
-        profilePhoto.getFile(file).addOnSuccessListener {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            onBitmapRetrieved(bitmap)
-            Log.d("photo123", "run")
-        }.addOnFailureListener {
-            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
-            onBitmapRetrieved(null)
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
-        onBitmapRetrieved(null)
-    }
-}
 
 
-fun profileItemIcon(itemname: String): Int {
-    if (itemname == ProfileItem.Personalinfo.name) {
-        return ProfileItem.Personalinfo.painter
-    } else if (itemname == ProfileItem.HelpCenter.name) {
-        return ProfileItem.HelpCenter.painter
-    } else if (itemname == ProfileItem.PrivacyPolicy.name) {
-        return ProfileItem.PrivacyPolicy.painter
-    } else if (itemname == ProfileItem.AboutMindtek.name) {
-        return ProfileItem.AboutMindtek.painter
-    } else {
-        return ProfileItem.Logout.painter
-    }
-}
+

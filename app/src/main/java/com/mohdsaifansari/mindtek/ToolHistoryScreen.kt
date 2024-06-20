@@ -24,9 +24,14 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -46,11 +52,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.LoadHistory
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: NavController) {
     val viewModel: HistoryViewModel = viewModel()
-    Column(
+    val historyItems by viewModel.historyData.collectAsState()
+
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    Box(
         modifier = Modifier
             .padding(paddingValues)
             .background(
@@ -62,11 +75,30 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
             )
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .nestedScroll(pullToRefreshState.nestedScrollConnection)
     ) {
-        ScrollableHistoryView(items = viewModel.loadData(), navController, viewModel, context)
+        if (pullToRefreshState.isRefreshing) {
+            LaunchedEffect(key1 = true) {
+                isRefreshing = true
+                viewModel.loadData()
+                delay(2000)
+                isRefreshing = false
+            }
+        }
+        LaunchedEffect(isRefreshing) {
+            if (isRefreshing) {
+                pullToRefreshState.startRefresh()
+            } else {
+                pullToRefreshState.endRefresh()
+            }
+        }
+        ScrollableHistoryView(items = historyItems, navController, viewModel, context)
+        PullToRefreshContainer(
+            state = pullToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            containerColor = Color(220, 226, 241, 255)
+        )
     }
 }
 

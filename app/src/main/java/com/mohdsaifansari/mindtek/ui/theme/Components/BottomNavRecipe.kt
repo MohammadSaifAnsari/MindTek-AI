@@ -10,12 +10,14 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -33,6 +35,7 @@ fun MainBottomNavigation(navController: NavController) {
     ) {
         val navStack by navController.currentBackStackEntryAsState()
         val currentState = navStack?.destination?.route
+        val coroutineScope = rememberCoroutineScope()
 
         items.forEach { item ->
             NavigationBarItem(
@@ -41,11 +44,13 @@ fun MainBottomNavigation(navController: NavController) {
                 },
                 selected = currentState == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let {
-                            popUpTo(item.route)
-                            launchSingleTop = true
-                            restoreState = true
+                    coroutineScope.launch {
+                        navController.navigate(item.route) {
+                            navController.graph.startDestinationRoute?.let {
+                                popUpTo(item.route)
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     }
                 },
