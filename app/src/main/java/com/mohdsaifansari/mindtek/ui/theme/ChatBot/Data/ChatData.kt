@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 object ChatData {
     val api_key = Apikey
 
-    suspend fun getResponse(prompt: String): Chat {
+    suspend fun getResponse(prompt: String): ChatWithUri {
         val generativeModel = GenerativeModel(
             modelName = "gemini-1.5-flash", apiKey = api_key
         )
@@ -18,21 +18,23 @@ object ChatData {
             val response = withContext(Dispatchers.IO) {
                 generativeModel.generateContent(prompt)
             }
-            return Chat(
-                prompt = response.text ?: "error",
-                bitmap = null,
-                isFromUser = false
+            return ChatWithUri(
+                timestamp = System.currentTimeMillis(),
+                message = response.text ?: "error",
+                imageAddress = "",
+                isUser = false
             )
         } catch (e: Exception) {
-            return Chat(
-                prompt = e.message ?: "error",
-                bitmap = null,
-                isFromUser = false
+            return ChatWithUri(
+                timestamp = System.currentTimeMillis(),
+                message = e.message ?: "error",
+                imageAddress = "",
+                isUser = false
             )
         }
     }
 
-    suspend fun getResponseImage(prompt: String, bitmap: Bitmap): Chat {
+    suspend fun getResponseImage(prompt: String, bitmap: Bitmap): ChatWithUri {
         val generativeModel = GenerativeModel(
             modelName = "gemini-1.5-flash", apiKey = api_key
         )
@@ -44,16 +46,18 @@ object ChatData {
             val response = withContext(Dispatchers.IO) {
                 generativeModel.generateContent(inputContent)
             }
-            return Chat(
-                prompt = response.text ?: "error",
-                bitmap = null,
-                isFromUser = false
+            return ChatWithUri(
+                timestamp = System.currentTimeMillis(),
+                message = response.text ?: "error",
+                imageAddress = "",
+                isUser = false
             )
         } catch (e: Exception) {
-            return Chat(
-                prompt = e.message ?: "error",
-                bitmap = null,
-                isFromUser = false
+            return ChatWithUri(
+                timestamp = System.currentTimeMillis(),
+                message = e.message ?: "error",
+                imageAddress = "",
+                isUser = false
             )
         }
     }

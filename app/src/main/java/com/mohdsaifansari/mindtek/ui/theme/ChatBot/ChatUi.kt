@@ -1,7 +1,5 @@
 package com.mohdsaifansari.mindtek.ui.theme.ChatBot
 
-import android.graphics.Bitmap
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,55 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
-@Composable
-fun UserChatBox(prompt: String, bitmap: Bitmap?) {
-    Column(
-        modifier = Modifier.padding(start = 100.dp, bottom = 11.dp, top = 22.dp)
-    ) {
-
-        Card(
-            shape = RoundedCornerShape(8.dp),
-            colors = CardColors(
-                containerColor = Color(140, 149, 192, 255),
-                contentColor = Color.Black,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = Color.Transparent
-            ),
-            modifier = Modifier.padding(bottom = 22.dp)
-        ) {
-            bitmap?.let {
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(260.dp)
-                        .padding(bottom = 6.dp, top = 4.dp, start = 4.dp, end = 4.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentDescription = "image",
-                    contentScale = ContentScale.Crop,
-                    bitmap = it.asImageBitmap()
-                )
-            }
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp, top = 4.dp, start = 12.dp, end = 12.dp)
-                    .background(Color.Transparent)
-                    .clip(RoundedCornerShape(12.dp)),
-                text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-}
 
 @Composable
 fun ModalChatBox(response: String) {
@@ -97,6 +56,49 @@ fun ModalChatBox(response: String) {
     }
 
 
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun UserUriChatBox(prompt: String, imageUri: String) {
+    Column(
+        modifier = Modifier.padding(start = 100.dp, bottom = 11.dp, top = 22.dp)
+    ) {
+
+        Card(
+            shape = RoundedCornerShape(8.dp),
+            colors = CardColors(
+                containerColor = Color(140, 149, 192, 255),
+                contentColor = Color.Black,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = Color.Transparent
+            ),
+            modifier = Modifier.padding(bottom = 22.dp)
+        ) {
+            if (imageUri.isNotEmpty()) {
+                GlideImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .padding(top = 4.dp, start = 4.dp, end = 4.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentDescription = "image",
+                    contentScale = ContentScale.Crop,
+                    model = imageUri
+
+                )
+            }
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp, top = 12.dp, start = 12.dp, end = 12.dp)
+                    .background(Color.Transparent)
+                    .clip(RoundedCornerShape(12.dp)),
+                text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
 }
 
 

@@ -32,11 +32,11 @@ class ProfileViewModel() : ViewModel() {
     val profilePictureBitmap: StateFlow<Bitmap?> = _profilePictureBitmap.asStateFlow()
 
 
-    val firebaseStorage = FirebaseStorage.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
+    private val firebaseStorage = FirebaseStorage.getInstance()
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
-    val uid = firebaseAuth.currentUser?.uid.toString()
+    private val uid = firebaseAuth.currentUser?.uid.toString()
 
     private var isFetchingOnlineData = false
 
@@ -196,7 +196,7 @@ class ProfileViewModel() : ViewModel() {
     }
 
     fun uploadProfilePicture(context: Context, uri: Uri, db: UserDatabase) {
-        var storageReference = firebaseStorage.getReference()
+        val storageReference = firebaseStorage.getReference()
         val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
 
         profilePhoto.putFile(uri).addOnSuccessListener {

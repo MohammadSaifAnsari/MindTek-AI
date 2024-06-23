@@ -100,6 +100,9 @@ dependencies {
     // Kotlin Extensions and Coroutines support for Room
     implementation(libs.androidx.room.ktx)
 
+    //Glide
+    implementation (libs.compose)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

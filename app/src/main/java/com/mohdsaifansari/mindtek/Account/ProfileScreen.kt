@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -66,7 +67,6 @@ fun ProfileScreen(
         "Logout"
     )
 
-    viewModel.checkUserData(context = context, db = DatabaseProvider.userDatabase)
 
 
     Column(
@@ -85,6 +85,9 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        LaunchedEffect(Unit) {
+            viewModel.checkUserData(context = context, db = DatabaseProvider.userDatabase)
+        }
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()

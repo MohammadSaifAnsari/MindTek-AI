@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -77,22 +78,23 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.mohdsaifansari.mindtek.Account.EditProfile
+import com.mohdsaifansari.mindtek.Account.ProfilePicture
+import com.mohdsaifansari.mindtek.Account.ProfileScreen
+import com.mohdsaifansari.mindtek.Account.ProfileViewModel
+import com.mohdsaifansari.mindtek.Database.ChatDatabaseProvider
+import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatUiState
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatViewModel
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.MainHeader
 import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ModalChatBox
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserChatBox
+import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserUriChatBox
 import com.mohdsaifansari.mindtek.ui.theme.Components.BottomNavItem
 import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
 import com.mohdsaifansari.mindtek.ui.theme.Components.MainBottomNavigation
 import com.mohdsaifansari.mindtek.ui.theme.Data.DrawerItem
 import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
-import com.mohdsaifansari.mindtek.Account.ProfilePicture
-import com.mohdsaifansari.mindtek.Account.ProfileScreen
-import com.mohdsaifansari.mindtek.Account.ProfileViewModel
-import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -130,6 +132,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MindtekTheme {
                 DatabaseProvider.initialize(this@MainActivity)
+                ChatDatabaseProvider.initialize(this@MainActivity)
                 val viewModel: ProfileViewModel = viewModel()
                 val navControllerSign = rememberNavController()
                 NavHost(
@@ -352,9 +355,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ChatScreen(paddingValues: PaddingValues) {
         val chatViewModel = viewModel<ChatViewModel>()
-        val chatState = chatViewModel.chatStat.collectAsState().value
+        val chatState = chatViewModel.chatstate.collectAsState().value
+
 
         val bitmap = getBitmap()
+        val uri = uriState.collectAsState().value
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -370,6 +375,9 @@ class MainActivity : ComponentActivity() {
                 ),
             verticalArrangement = Arrangement.Bottom
         ) {
+            LaunchedEffect(Unit) {
+                chatViewModel.checkChatData(context, db = ChatDatabaseProvider.chatDatabase)
+            }
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -378,10 +386,12 @@ class MainActivity : ComponentActivity() {
                 reverseLayout = true
             ) {
                 itemsIndexed(chatState.chatList) { index, chat ->
-                    if (chat.isFromUser) {
-                        UserChatBox(prompt = chat.prompt, bitmap = chat.bitmap)
-                    } else {
-                        ModalChatBox(response = chat.prompt)
+                    if (chat != null) {
+                        if (chat.isUser) {
+                            UserUriChatBox(prompt = chat.message, imageUri = chat.imageAddress)
+                        } else {
+                            ModalChatBox(response = chat.message)
+                        }
                     }
                 }
             }
@@ -442,7 +452,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .size(40.dp)
                         .clickable {
-                            chatViewModel.onEvent(ChatUiState.SendPrompt(chatState.prompt, bitmap))
+                            chatViewModel.onEvent(
+                                ChatUiState.SendPrompt(
+                                    chatState.prompt,
+                                    bitmap,
+                                    uri
+                                )
+                            )
                             uriState.update { "" }
                         }
                         .background(Color.Transparent), tint = Color(140, 149, 192, 255)

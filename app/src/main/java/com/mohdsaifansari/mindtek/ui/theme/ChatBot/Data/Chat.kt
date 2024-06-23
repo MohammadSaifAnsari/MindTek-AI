@@ -1,9 +1,11 @@
 package com.mohdsaifansari.mindtek.ui.theme.ChatBot.Data
 
-import android.graphics.Bitmap
 
-data class Chat(
-    val prompt:String,
-    val bitmap: Bitmap?,
-    val isFromUser: Boolean)
+data class ChatWithUri(
+    val timestamp: Long,
+    val message: String,
+    val imageAddress: String,
+    val isUser: Boolean
+
+)
 
