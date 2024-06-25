@@ -85,6 +85,9 @@ dependencies {
     // Add the dependency for the Firebase Firestore dependencies
     implementation(libs.firebase.firestore)
 
+    // Also add the dependency for the Google Play services library and specify its version
+    implementation(libs.gms.play.services.auth)
+
     //Splash Screen
     implementation(libs.androidx.core.splashscreen)
 

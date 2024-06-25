@@ -14,7 +14,7 @@ interface ChatDao {
     @Delete
     suspend fun deleteChat(chat: ChatEntity)
 
-    @Query("DELETE FROM ChatEntity") // Replace 'chat_table' with youractual table name
+    @Query("DELETE FROM ChatEntity")
     suspend fun deleteAllChats()
 
     @Query("SELECT * FROM ChatEntity ORDER BY timestamp")

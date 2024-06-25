@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,13 +52,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
+import androidx.navigation.NavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
+import com.mohdsaifansari.mindtek.Components.LogInItem
 import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.Database.UserDatabase
-import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
 import kotlinx.coroutines.flow.MutableStateFlow
 
 
@@ -67,10 +69,11 @@ fun EditProfile(
     imagePicker: ActivityResultLauncher<PickVisualMediaRequest>,
     uriState: MutableStateFlow<String>,
     viewModel: ProfileViewModel,
-    db: UserDatabase
+    db: UserDatabase,
+    navController: NavController
 ) {
     Scaffold(topBar = {
-        EditProfileHeader()
+        EditProfileHeader(navController)
     }) { innerPadding ->
         MainContentEditProfile(
             innerPadding,
@@ -256,7 +259,7 @@ fun MainContentEditProfile(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileHeader() {
+fun EditProfileHeader(navController: NavController) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -276,7 +279,17 @@ fun EditProfileHeader() {
         ), navigationIcon = {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowLeft,
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable {
+                        navController.navigate(LogInItem.HomeScreen.route) {
+                            popUpTo(LogInItem.ProfileEditNav.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 contentDescription = null
             )
         }

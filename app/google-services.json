@@ -12,7 +12,20 @@
           "package_name": "com.mohdsaifansari.mindtek"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "699644756923-pi5ec53jn043pajptjhhu8mm0cglcff2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mohdsaifansari.mindtek",
+            "certificate_hash": "3fea8547e0c899a1ce454f0d3eb529db23281e59"
+          }
+        },
+        {
+          "client_id": "699644756923-bv2bnvri48kigiiklk6apu1h8ff6r2j5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCyEIyYkQaes_FAlPweYgzsm3e31WEF4rQ"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "699644756923-43eon0ci5gu379c85gn8kt3264pa9lbn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

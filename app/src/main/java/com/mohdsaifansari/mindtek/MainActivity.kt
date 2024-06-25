@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -81,19 +82,24 @@ import com.mohdsaifansari.mindtek.Account.EditProfile
 import com.mohdsaifansari.mindtek.Account.ProfilePicture
 import com.mohdsaifansari.mindtek.Account.ProfileScreen
 import com.mohdsaifansari.mindtek.Account.ProfileViewModel
+import com.mohdsaifansari.mindtek.Authentication.SignInScreen
+import com.mohdsaifansari.mindtek.Authentication.SignUpScreen
 import com.mohdsaifansari.mindtek.Database.ChatDatabaseProvider
 import com.mohdsaifansari.mindtek.Database.DatabaseProvider
-import com.mohdsaifansari.mindtek.ui.theme.AITool.MainAiToolScreen
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatUiState
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ChatViewModel
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.MainHeader
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.ModalChatBox
-import com.mohdsaifansari.mindtek.ui.theme.ChatBot.UserUriChatBox
-import com.mohdsaifansari.mindtek.ui.theme.Components.BottomNavItem
-import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
-import com.mohdsaifansari.mindtek.ui.theme.Components.MainBottomNavigation
-import com.mohdsaifansari.mindtek.ui.theme.Data.DrawerItem
-import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
+import com.mohdsaifansari.mindtek.AITool.MainAiToolScreen
+import com.mohdsaifansari.mindtek.Account.ProfileItemScreen
+import com.mohdsaifansari.mindtek.ChatBot.ChatUiState
+import com.mohdsaifansari.mindtek.ChatBot.ChatViewModel
+import com.mohdsaifansari.mindtek.ChatBot.MainHeader
+import com.mohdsaifansari.mindtek.ChatBot.ModalChatBox
+import com.mohdsaifansari.mindtek.ChatBot.UserUriChatBox
+import com.mohdsaifansari.mindtek.Components.BottomNavItem
+import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.MainBottomNavigation
+import com.mohdsaifansari.mindtek.Data.DrawerItem
+import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
+import com.mohdsaifansari.mindtek.History.ResultScreen
+import com.mohdsaifansari.mindtek.History.ToolHistory
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -172,7 +178,8 @@ class MainActivity : ComponentActivity() {
                                 imagePicker,
                                 uriState,
                                 viewModel,
-                                db = DatabaseProvider.userDatabase
+                                db = DatabaseProvider.userDatabase,
+                                navControllerSign
                             )
                         }
                     }
@@ -182,6 +189,14 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(LogInItem.ResultScreen.route) {
                             ResultScreen(navControllerSign, context)
+                        }
+                    }
+                    navigation(
+                        startDestination = LogInItem.ProfileItemScreen.route,
+                        route = LogInItem.ProfileItemNav.route
+                    ) {
+                        composable(LogInItem.ProfileItemScreen.route) {
+                            ProfileItemScreen(navController = navControllerSign, context = context)
                         }
                     }
 
@@ -203,7 +218,6 @@ class MainActivity : ComponentActivity() {
 
         val drawerItemList = listOf(
             DrawerItem(R.drawable.setting, "Setting"),
-            DrawerItem(R.drawable.helpcenter, "Help and Feedback"),
             DrawerItem(R.drawable.logout, "Logout")
         )
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
@@ -222,6 +236,12 @@ class MainActivity : ComponentActivity() {
                             )
                         )
                 ) {
+                    LaunchedEffect(Unit) {
+                        viewModel.checkUserData(
+                            context = context,
+                            db = DatabaseProvider.userDatabase
+                        )
+                    }
                     Spacer(modifier = Modifier.height(50.dp))
                     ProfilePicture(
                         viewModel = viewModel,
@@ -270,6 +290,8 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
+                            } else if (item.title == "Setting") {
+                                Toast.makeText(context, "Setting", Toast.LENGTH_SHORT).show()
                             }
                         }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         colors = NavigationDrawerItemDefaults.colors(

@@ -40,12 +40,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.R
-import com.mohdsaifansari.mindtek.ui.theme.Components.LogInItem
-import com.mohdsaifansari.mindtek.ui.theme.Data.ProfilePhotoKey
+import com.mohdsaifansari.mindtek.Components.LogInItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -56,12 +58,11 @@ fun ProfileScreen(
     context: Context,
     viewModel: ProfileViewModel
 ) {
-
     val profileData by viewModel.userData.collectAsState()
 
     val profileItemlist = listOf(
         "Personal info",
-        "Help Center",
+        "Contact Us",
         "Privacy Policy",
         "About Mindtek",
         "Logout"
@@ -153,6 +154,9 @@ fun ProfileItemRow(
                 .clickable {
                     if (item == "Logout") {
                         firebaseAuth.signOut()
+                        viewModel.viewModelScope.launch(Dispatchers.IO) {
+                            viewModel.logoutClearDatabase(db = DatabaseProvider.userDatabase)
+                        }
                         navController.navigate(LogInItem.AuthScreen.route) {
                             popUpTo(LogInItem.HomeScreen.route) {
                                 inclusive = true
@@ -163,6 +167,14 @@ fun ProfileItemRow(
                     } else if (item == "Personal info") {
                         navController.navigate(LogInItem.ProfileEditNav.route) {
                             popUpTo(LogInItem.ProfileEditNav.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        navController.navigate("Profile_Item_nav/${item}") {
+                            popUpTo(LogInItem.ProfileItemNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

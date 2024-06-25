@@ -13,9 +13,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.mohdsaifansari.mindtek.Database.User
 import com.mohdsaifansari.mindtek.Database.UserDatabase
-import com.mohdsaifansari.mindtek.NetworkConnectivityChecker
-import com.mohdsaifansari.mindtek.ui.theme.Data.ProfileItem
-import com.mohdsaifansari.mindtek.ui.theme.Data.UserData
+import com.mohdsaifansari.mindtek.Network.NetworkConnectivityChecker
+import com.mohdsaifansari.mindtek.Data.UserData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +42,7 @@ class ProfileViewModel() : ViewModel() {
 
     fun checkUserData(context: Context, db: UserDatabase) {
         val networkConnectivityChecker = NetworkConnectivityChecker(context)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             fetchOfflineData(db)
             networkConnectivityChecker.isNetworkAvailable().collect { isAvailable ->
                 Log.d("ViewModel123", "Network available: $isAvailable")
@@ -55,7 +55,7 @@ class ProfileViewModel() : ViewModel() {
     }
 
     private fun fetchOnlineData(context: Context, db: UserDatabase) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 fetchUserData(context, db)
                 fetchProfilePicture(context)
@@ -68,7 +68,7 @@ class ProfileViewModel() : ViewModel() {
     }
 
     private fun fetchOfflineData(db: UserDatabase) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val latestUser = db.dao.getLatestUser()
                 _userData.value = latestUser?.let {
@@ -87,7 +87,7 @@ class ProfileViewModel() : ViewModel() {
     }
 
     private fun fetchOfflineProfilePicture(db: UserDatabase) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val latestUser = db.dao.getLatestUser()
                 _profilePictureBitmap.value = latestUser?.profilePicture?.let { byteArray ->
@@ -101,7 +101,7 @@ class ProfileViewModel() : ViewModel() {
 
 
     fun fetchUserData(context: Context, db: UserDatabase) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             firestore.collection("Users").document(firebaseAuth.currentUser?.uid.toString()).get()
                 .addOnSuccessListener { documentSnapshot ->
                     val firstUserName = documentSnapshot.getString("First Name").toString()
@@ -137,8 +137,12 @@ class ProfileViewModel() : ViewModel() {
         }
     }
 
+    suspend fun logoutClearDatabase(db: UserDatabase) {
+        db.dao.deleteAllUser()
+    }
+
     private fun fetchProfilePicture(context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             retrieveProfilePicture(context) { bitmap ->
                 _profilePictureBitmap.value = bitmap
             }
@@ -150,7 +154,7 @@ class ProfileViewModel() : ViewModel() {
 
         val storageReference = firebaseStorage.getReference()
         val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val timestamp = System.currentTimeMillis()
                 val file = File.createTempFile("Profile Photo_$timestamp", ".png")
@@ -176,38 +180,43 @@ class ProfileViewModel() : ViewModel() {
         context: Context,
         db: UserDatabase
     ) {
-        val uid = firebaseAuth.currentUser?.uid.toString()
+        viewModelScope.launch(Dispatchers.IO) {
+            val uid = firebaseAuth.currentUser?.uid.toString()
 
-        val userProfile = hashMapOf<String, Any>(
-            "First Name" to firstName,
-            "Last Name" to lastName
-        )
-        firestore.collection("Users").document(uid)
-            .update(userProfile)
-            .addOnSuccessListener {
-                fetchUserData(context, db)
-            }.addOnFailureListener {
-                Toast.makeText(
-                    context,
-                    "Something went wrong while updating name",
-                    Toast.LENGTH_SHORT
-                ).show();
-            }
+            val userProfile = hashMapOf<String, Any>(
+                "First Name" to firstName,
+                "Last Name" to lastName
+            )
+            firestore.collection("Users").document(uid)
+                .update(userProfile)
+                .addOnSuccessListener {
+                    fetchUserData(context, db)
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        context,
+                        "Something went wrong while updating name",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                }
+        }
+
     }
 
     fun uploadProfilePicture(context: Context, uri: Uri, db: UserDatabase) {
         val storageReference = firebaseStorage.getReference()
         val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
 
-        profilePhoto.putFile(uri).addOnSuccessListener {
-            fetchUserData(context, db)
-            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
-        }.addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Something went wrong while uploading profile photo",
-                Toast.LENGTH_SHORT
-            ).show();
+        viewModelScope.launch(Dispatchers.IO) {
+            profilePhoto.putFile(uri).addOnSuccessListener {
+                fetchUserData(context, db)
+                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+            }.addOnFailureListener {
+                Toast.makeText(
+                    context,
+                    "Something went wrong while uploading profile photo",
+                    Toast.LENGTH_SHORT
+                ).show();
+            }
         }
     }
 
@@ -228,7 +237,7 @@ class ProfileViewModel() : ViewModel() {
     private fun Bitmap.toByteArray():
             ByteArray {
         val stream = ByteArrayOutputStream()
-        compress(Bitmap.CompressFormat.PNG, 100, stream)
+        compress(Bitmap.CompressFormat.PNG, 50, stream)
         return stream.toByteArray()
     }
 

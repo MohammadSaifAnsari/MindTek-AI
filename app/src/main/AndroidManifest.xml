@@ -17,7 +17,7 @@
         android:theme="@style/Theme.Mindtek"
         tools:targetApi="31">
         <activity
-            android:name=".ui.theme.AITool.SummarizerActivity"
+            android:name=".AITool.SummarizerActivity"
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.Mindtek" />
@@ -35,7 +35,7 @@
 
         <meta-data
             android:name="pspdfkit_license_key"
-            android:value="c4ccO5gDXsOQK3ZSRLqJOSWth3D4agbsPNnj1J10WSyI-6PMWs07Sq1CTiXcvbQ-JBRWEVGgm0m7GGtdJUAoBnrKZhIsQlXSh3gYqM90VME3EnZlVoZ-m5zNxOF5fe1YpLRRdWlZ8khIvDc10gdlDQtofrHdwZJHcBQvYU-xKcxIIghMCvwixT-kR9kk3ZAByDp9j_67wxVKY1A" />
+            android:value="xtkHvcCFxy90I4WKmv3S-n7cm4pEGnzk9HtRC6gSiOkfINPlyG4XUQD9WYpxxCKK5FwUNHYRJ97qcd7Rl6rOD3rKZhIsQlXSh3gYqM90VME7p-BezO-1G6Berw8aCi7zpLRRdWlZ8khIvDc10gdlDfBLr26jXloXzPw3xjTTNxQDBftO8g6NmOGS4ZuqSNU_prDXxLCUvHBloxuM" />
     </application>
 
 </manifest>
