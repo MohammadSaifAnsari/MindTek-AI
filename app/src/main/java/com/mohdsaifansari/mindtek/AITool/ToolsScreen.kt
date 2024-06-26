@@ -1,11 +1,13 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -65,6 +67,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
+import com.mohdsaifansari.mindtek.MainActivity
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -92,7 +95,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
     }
     Scaffold(
         topBar = {
-            ToolsHeader(title)
+            ToolsHeader(title, context)
         }
     ) { innerPadding ->
         Column(
@@ -278,7 +281,7 @@ fun SheetContentScreen(getResponse: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolsHeader(title: String) {
+fun ToolsHeader(title: String, context: Context) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -296,7 +299,14 @@ fun ToolsHeader(title: String) {
         ), navigationIcon = {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable {
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        context.startActivity(intent)
+                    },
                 contentDescription = null
             )
         }

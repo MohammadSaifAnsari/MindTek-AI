@@ -98,6 +98,7 @@ import com.mohdsaifansari.mindtek.Components.LogInItem
 import com.mohdsaifansari.mindtek.Components.MainBottomNavigation
 import com.mohdsaifansari.mindtek.Data.DrawerItem
 import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
+import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.History.ResultScreen
 import com.mohdsaifansari.mindtek.History.ToolHistory
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
@@ -139,6 +140,7 @@ class MainActivity : ComponentActivity() {
             MindtekTheme {
                 DatabaseProvider.initialize(this@MainActivity)
                 ChatDatabaseProvider.initialize(this@MainActivity)
+                ToolHistoryDatabaseProvider.initialize(this@MainActivity)
                 val viewModel: ProfileViewModel = viewModel()
                 val navControllerSign = rememberNavController()
                 NavHost(

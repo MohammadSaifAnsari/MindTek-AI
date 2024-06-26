@@ -20,6 +20,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -31,8 +36,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.R
 
 @Composable
@@ -41,17 +48,18 @@ fun ResultScreen(navController: NavController, context: Context) {
     Scaffold(topBar = {
         ResultHeader(result, context, navController)
     }) { innerPadding ->
-        ResultMainScreen(result, paddingValues = innerPadding)
+        ResultMainScreen(result.toString(), paddingValues = innerPadding)
     }
 
 }
 
 @Composable
 fun ResultMainScreen(
-    resultText: String?,
+    resultText: String,
     paddingValues: PaddingValues
 ) {
-
+    val viewModel: HistoryViewModel = viewModel()
+    var result by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,9 +79,16 @@ fun ResultMainScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            if (resultText != null) {
+
+            LaunchedEffect(Unit) {
+                result = ToolHistoryDatabaseProvider.toolHistoryDatabase.toolHistoryDao()
+                    .getToolHistoryById(resultText.toInt())
+            }
+            //start
+            result?.let {
                 Text(
-                    text = resultText, modifier = Modifier.padding(16.dp),
+                    text = it.substring(1, it.length - 1),
+                    modifier = Modifier.padding(16.dp),
                     fontStyle = FontStyle.Normal,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Serif,
@@ -110,7 +125,16 @@ fun ResultHeader(resultText: String?, context: Context, navController: NavContro
             Icon(
                 imageVector = Icons.Default.KeyboardArrowLeft,
                 modifier = Modifier
-                    .padding(5.dp),
+                    .padding(5.dp)
+                    .clickable {
+                        navController.navigate(LogInItem.HomeScreen.route) {
+                            popUpTo(LogInItem.ResultNav.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 contentDescription = null
             )
         }, actions = {

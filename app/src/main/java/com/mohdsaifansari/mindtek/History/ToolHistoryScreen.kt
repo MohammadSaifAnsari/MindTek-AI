@@ -1,6 +1,7 @@
 package com.mohdsaifansari.mindtek.History
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mohdsaifansari.mindtek.Components.LogInItem
 import com.mohdsaifansari.mindtek.Data.LoadHistory
+import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.R
 import kotlinx.coroutines.delay
 
@@ -79,10 +81,17 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
             .fillMaxSize()
             .nestedScroll(pullToRefreshState.nestedScrollConnection)
     ) {
+        LaunchedEffect(Unit) {
+            viewModel.checkToolHistoryData(context, ToolHistoryDatabaseProvider.toolHistoryDatabase)
+        }
+
         if (pullToRefreshState.isRefreshing) {
             LaunchedEffect(key1 = true) {
                 isRefreshing = true
-                viewModel.loadData()
+                viewModel.checkToolHistoryData(
+                    context,
+                    ToolHistoryDatabaseProvider.toolHistoryDatabase
+                )
                 delay(2000)
                 isRefreshing = false
             }
@@ -124,7 +133,7 @@ fun ScrollableHistoryView(
                     .padding(8.dp)
                     .fillMaxWidth()
                     .clickable {
-                        navController.navigate("Result_nav/${item.result}") {
+                        navController.navigate("Result_nav/${item.idNo}") {
                             popUpTo(LogInItem.ResultNav.route) {
                                 inclusive = true
                             }
@@ -194,7 +203,13 @@ fun ScrollableHistoryView(
                                     selectedItem = label
                                     expandedDropDownMenu = false
                                     if (label == "Delete") {
-                                        item.idNo?.let { viewModel.deleteHistoryItem(it, context) }
+                                        item.idNo?.let {
+                                            viewModel.deleteHistoryItem(
+                                                it,
+                                                context,
+                                                db = ToolHistoryDatabaseProvider.toolHistoryDatabase
+                                            )
+                                        }
                                     }
                                 })
                             }

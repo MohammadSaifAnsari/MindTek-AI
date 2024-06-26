@@ -1,7 +1,9 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,13 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import com.mohdsaifansari.mindtek.MainActivity
 import com.pspdfkit.document.PdfDocument
 import com.pspdfkit.document.PdfDocumentLoader.openDocument
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SummarizerHeader(title: String) {
+fun SummarizerHeader(title: String, context: Context) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -41,7 +44,14 @@ fun SummarizerHeader(title: String) {
         ), navigationIcon = {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .clickable {
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        context.startActivity(intent)
+                    },
                 contentDescription = null
             )
         }
@@ -49,19 +59,18 @@ fun SummarizerHeader(title: String) {
 }
 
 
-
 // on below line we are creating an extract data method to extract our data.
-fun extractData(extractedString: MutableState<String>,path:String,context: Context) {
+fun extractData(extractedString: MutableState<String>, path: String, context: Context) {
     try {
         // on below line we are creating a variable for storing our extracted text
         var extractedText = ""
 
-        val document: PdfDocument  = openDocument(context, Uri.parse(path))
+        val document: PdfDocument = openDocument(context, Uri.parse(path))
         val count = document.pageCount
 
         for (i in 0 until count) {
             var eText = document.getPageText(i).trim()
-            extractedText = extractedText+"\n"+eText
+            extractedText = extractedText + "\n" + eText
         }
 
         // on below line we are setting extracted text to our text view.

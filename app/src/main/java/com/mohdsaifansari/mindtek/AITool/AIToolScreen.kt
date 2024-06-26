@@ -55,10 +55,10 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
     val itemWriter = listOf(
         "Creative Story",
         "Creative Letter",
-        "Love Letter",
-        "Poems",
         "Song Lyrics",
-        "Food Recipe"
+        "Food Recipe",
+        "Poems",
+        "Love Letter"
     )
     val itemGrammar = listOf(
         "Grammer Correction",
@@ -148,7 +148,7 @@ fun ScrollableCardView(items: List<String>, context: Context) {
             Card(
                 modifier = Modifier
                     .padding(6.dp)
-                    .size(180.dp, 130.dp)
+                    .size(190.dp, 130.dp)
                     .clickable {
                         val title = ToolData(item).title
                         MySwitchCase(title = title, context = context)

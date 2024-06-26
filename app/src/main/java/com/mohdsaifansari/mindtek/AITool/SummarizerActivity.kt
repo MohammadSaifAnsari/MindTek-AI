@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -140,7 +141,7 @@ class SummarizerActivity : ComponentActivity() {
         }
         Scaffold(
             topBar = {
-                SummarizerHeader(title = title)
+                SummarizerHeader(title = title, this@SummarizerActivity)
             }
         ) { innerPadding ->
             Column(
@@ -387,5 +388,6 @@ fun date(): Date {
     )
 
 }
+
 
 
