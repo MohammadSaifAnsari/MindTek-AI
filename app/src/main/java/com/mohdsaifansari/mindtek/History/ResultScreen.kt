@@ -44,9 +44,18 @@ import com.mohdsaifansari.mindtek.R
 
 @Composable
 fun ResultScreen(navController: NavController, context: Context) {
-    val result = navController.currentBackStackEntry?.arguments?.getString("result")
+    val resultFromNav = navController.currentBackStackEntry?.arguments?.getString("result")
+
+    val viewModel: HistoryViewModel = viewModel()
+    var result by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        if (resultFromNav != null) {
+            result = ToolHistoryDatabaseProvider.toolHistoryDatabase.toolHistoryDao()
+                .getToolHistoryById(resultFromNav.toInt())
+        }
+    }
     Scaffold(topBar = {
-        ResultHeader(result, context, navController)
+        ResultHeader(result.toString(), context, navController)
     }) { innerPadding ->
         ResultMainScreen(result.toString(), paddingValues = innerPadding)
     }
@@ -58,8 +67,6 @@ fun ResultMainScreen(
     resultText: String,
     paddingValues: PaddingValues
 ) {
-    val viewModel: HistoryViewModel = viewModel()
-    var result by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,22 +86,14 @@ fun ResultMainScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-
-            LaunchedEffect(Unit) {
-                result = ToolHistoryDatabaseProvider.toolHistoryDatabase.toolHistoryDao()
-                    .getToolHistoryById(resultText.toInt())
-            }
-            //start
-            result?.let {
-                Text(
-                    text = it.substring(1, it.length - 1),
-                    modifier = Modifier.padding(16.dp),
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily.Serif,
-                    softWrap = true
-                )
-            }
+            Text(
+                text = resultText.substring(1, resultText.length - 1),
+                modifier = Modifier.padding(16.dp),
+                fontStyle = FontStyle.Normal,
+                fontWeight = FontWeight.Medium,
+                fontFamily = FontFamily.Serif,
+                softWrap = true
+            )
         }
     }
 

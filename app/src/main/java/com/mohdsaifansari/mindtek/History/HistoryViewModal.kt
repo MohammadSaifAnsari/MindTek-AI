@@ -24,6 +24,9 @@ class HistoryViewModel : ViewModel() {
     private val _historyData = MutableStateFlow<List<LoadHistory>>(emptyList())
     val historyData: StateFlow<List<LoadHistory>> = _historyData.asStateFlow()
 
+    private val _isloading = MutableStateFlow<Boolean>(true)
+    val isloading: StateFlow<Boolean> = _isloading.asStateFlow()
+
     val firestore = FirebaseFirestore.getInstance()
     val firebaseAuth = FirebaseAuth.getInstance()
     val uid = firebaseAuth.currentUser?.uid.toString()
@@ -86,12 +89,12 @@ class HistoryViewModel : ViewModel() {
                 }
                 _historyData.value = updatedData
             }
-
         }
     }
 
     private fun fetchOnlineToolHistoryData(db: ToolHistoryDatabase) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isloading.value = true
             firestore.collection("History").document(uid).collection("ToolHistory")
                 .orderBy("idNo", Query.Direction.DESCENDING).get()
                 .addOnSuccessListener { documentSnapshot ->
@@ -117,11 +120,12 @@ class HistoryViewModel : ViewModel() {
                                     year.toString()
                                 )
                             )
+                            _isloading.value = false
                         }
-
-
                     }
-
+                }.addOnFailureListener {
+                    _isloading.value = false
+                    Log.d("ViewModel123", "Error fetching data: ${it.message}")
                 }
         }
     }

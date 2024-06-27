@@ -16,15 +16,23 @@ import com.mohdsaifansari.mindtek.ChatBot.Data.ChatState
 import com.mohdsaifansari.mindtek.ChatBot.Data.ChatWithUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class ChatViewModel : ViewModel() {
     private val _chatstate = MutableStateFlow(ChatState())
     val chatstate = _chatstate.asStateFlow()
+
+    private val _isloadingAnimation = MutableStateFlow<Boolean>(false)
+    val isloadingAnimation: StateFlow<Boolean> = _isloadingAnimation.asStateFlow()
+
+    private val _iscircularloading = MutableStateFlow<Boolean>(false)
+    val iscircularloading: StateFlow<Boolean> = _iscircularloading.asStateFlow()
 
     private val firebaseStorage = FirebaseStorage.getInstance()
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -55,12 +63,14 @@ class ChatViewModel : ViewModel() {
     }
 
     private fun addPrompt(prompt: String, bitmap: Bitmap?, imageUri: String) {
+        _isloadingAnimation.value = true
         if (bitmap != null) {
             uploadTextWithImageData(prompt, bitmap.toByteArray(), true, System.currentTimeMillis())
         } else {
             uploadTextData(prompt, true, System.currentTimeMillis())
         }
         _chatstate.update {
+
             it.copy(
                 chatList = it.chatList.toMutableList().apply {
                     add(0, ChatWithUri(System.currentTimeMillis(), prompt, imageUri, true))
@@ -76,6 +86,7 @@ class ChatViewModel : ViewModel() {
             val chat = ChatData.getResponse(prompt, chatstate.value.chatList)
             uploadTextData(chat.message, chat.isUser, System.currentTimeMillis())
             _chatstate.update {
+                _isloadingAnimation.value = false
                 it.copy(
                     chatList = it.chatList.toMutableList().apply {
                         add(0, chat)
@@ -90,6 +101,7 @@ class ChatViewModel : ViewModel() {
             val chat = ChatData.getResponseImage(prompt, bitmap)
             uploadTextData(chat.message, chat.isUser, System.currentTimeMillis())
             _chatstate.update {
+                _isloadingAnimation.value = false
                 it.copy(
                     chatList = it.chatList.toMutableList().apply {
                         add(0, chat)
@@ -187,6 +199,7 @@ class ChatViewModel : ViewModel() {
                     )
                 }
                 _chatstate.update {
+                    _iscircularloading.value = false
                     it.copy(
                         chatList = chatWithUris.toMutableList(),
                     )
@@ -198,6 +211,9 @@ class ChatViewModel : ViewModel() {
 
     private fun fetchOnlineChatListData(db: ChatDatabase) {
         viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                _iscircularloading.value = true
+            }
             firestore.collection("ChatBot")
                 .document(uid)
                 .collection("ChatList")
@@ -219,6 +235,7 @@ class ChatViewModel : ViewModel() {
                         }
                     }
                 }.addOnFailureListener {
+                    _iscircularloading.value = false
                     Log.d("ChatViewModal", "Error in fetching chat List data ")
                 }
         }

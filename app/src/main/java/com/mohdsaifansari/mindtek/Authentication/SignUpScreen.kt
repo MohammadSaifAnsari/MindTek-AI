@@ -10,16 +10,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,7 +80,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color.White),
+                .background(Color.White)
+                .imePadding(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -181,6 +185,7 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
 
             Button(
                 onClick = {
+                    viewModel.closeKeyboard(context)
                     viewModel.signUp(
                         auth = auth,
                         firstName = firstNametext,
@@ -196,7 +201,13 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     .fillMaxWidth(0.5f),
                 enabled = isEnabledButton
             ) {
-                Text(text = "Sign Up")
+                if (viewModel.isloadingAnimation.collectAsState().value){
+                    CircularProgressIndicator(
+                        color = Color(160, 166, 181, 255)
+                    )
+                }else{
+                    Text(text = "Sign Up")
+                }
             }
             Spacer(
                 modifier = Modifier

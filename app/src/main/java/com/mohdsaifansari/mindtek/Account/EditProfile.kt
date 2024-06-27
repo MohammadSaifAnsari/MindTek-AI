@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -238,20 +239,27 @@ fun MainContentEditProfile(
         val uri = uriState.collectAsState().value.toUri()
         Button(
             onClick = {
-                viewModel.updateProfileData(firstNametext, lastNametext, context, db)
+                viewModel.updateProfileData(firstNametext.trim(), lastNametext.trim(), context, db)
                 viewModel.uploadProfilePicture(context = context, uri = uri, db)
             },
             modifier = Modifier
                 .fillMaxWidth(0.7f)
                 .clip(RoundedCornerShape(16.dp))
         ) {
-            Text(
-                text = "Update",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(2.dp),
-                color = Color.White
-            )
+            if (viewModel.iscircularloading.collectAsState().value) {
+                CircularProgressIndicator(
+                    color = Color(160, 166, 181, 255)
+                )
+            } else {
+                Text(
+                    text = "Update",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.White
+                )
+            }
+
         }
 
     }

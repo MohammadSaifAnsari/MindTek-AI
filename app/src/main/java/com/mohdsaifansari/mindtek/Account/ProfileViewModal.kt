@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -30,6 +31,9 @@ class ProfileViewModel() : ViewModel() {
 
     private val _profilePictureBitmap = MutableStateFlow<Bitmap?>(null)
     val profilePictureBitmap: StateFlow<Bitmap?> = _profilePictureBitmap.asStateFlow()
+
+    private val _iscircularloading = MutableStateFlow<Boolean>(false)
+    val iscircularloading: StateFlow<Boolean> = _iscircularloading.asStateFlow()
 
 
     private val firebaseStorage = FirebaseStorage.getInstance()
@@ -61,6 +65,7 @@ class ProfileViewModel() : ViewModel() {
                 fetchProfilePicture(context)
 
             } catch (e: Exception) {
+                _iscircularloading.value = false
                 Log.e("prof123", "Error fetching online data: ${e.message}")
                 // Consider showing an error message to the user
             }
@@ -100,7 +105,7 @@ class ProfileViewModel() : ViewModel() {
     }
 
 
-    fun fetchUserData(context: Context, db: UserDatabase) {
+    private fun fetchUserData(context: Context, db: UserDatabase) {
         viewModelScope.launch(Dispatchers.IO) {
             firestore.collection("Users").document(firebaseAuth.currentUser?.uid.toString()).get()
                 .addOnSuccessListener { documentSnapshot ->
@@ -123,6 +128,7 @@ class ProfileViewModel() : ViewModel() {
                                             byteArray
                                         )
                                     )
+                                    _iscircularloading.value = false
                                 }
                             } catch (e: Exception) {
                                 Log.e("prof123", "Error fetching online data: ${e.message}")
@@ -207,6 +213,9 @@ class ProfileViewModel() : ViewModel() {
         val profilePhoto = storageReference.child("Users/$uid/Profile Photo")
 
         viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                _iscircularloading.value = true
+            }
             profilePhoto.putFile(uri).addOnSuccessListener {
                 fetchUserData(context, db)
                 Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();

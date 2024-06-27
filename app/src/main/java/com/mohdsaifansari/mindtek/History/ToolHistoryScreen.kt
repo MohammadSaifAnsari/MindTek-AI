@@ -1,7 +1,6 @@
 package com.mohdsaifansari.mindtek.History
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,6 +62,8 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
     val viewModel: HistoryViewModel = viewModel()
     val historyItems by viewModel.historyData.collectAsState()
 
+    val shimmerLoading by viewModel.isloading.collectAsState()
+
     var isRefreshing by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -103,7 +104,25 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
                 pullToRefreshState.endRefresh()
             }
         }
-        ScrollableHistoryView(items = historyItems, navController, viewModel, context)
+        if (shimmerLoading && historyItems.isNotEmpty()) {
+            HistoryShimmerListItem(
+                isLoading = shimmerLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+        } else if (historyItems.isEmpty()) {
+            Text(
+                text = "No History",
+                modifier = Modifier.align(Alignment.Center),
+                fontSize = 20.sp,
+                fontFamily = FontFamily.Serif
+            )
+        } else {
+            ScrollableHistoryView(items = historyItems, navController, viewModel, context)
+        }
+
+
         PullToRefreshContainer(
             state = pullToRefreshState,
             modifier = Modifier.align(Alignment.TopCenter),

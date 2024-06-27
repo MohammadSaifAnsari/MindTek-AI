@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,8 +66,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.R
-import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
+import com.mohdsaifansari.mindtek.Components.LoadingAnimation
 import com.mohdsaifansari.mindtek.MainActivity
 
 
@@ -155,7 +156,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
                             Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT)
                                 .show();
                         }
-                    viewmodel.sendMessage(PromptCase(title = title) + inputText)
+                    viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
                     showBottomSheet = true
                 }, enabled = isEnabledButton
             ) {
@@ -217,7 +218,10 @@ fun Generation(title: String, subTitle: String, context: Context) {
                             )
                         }
                     }
-                    SheetContentScreen(outputMessage.substring(1, (outputMessage.length - 1)))
+                    SheetContentScreen(
+                        outputMessage.substring(1, (outputMessage.length - 1)),
+                        viewmodel
+                    )
                     showDialog = false
                     Box(
                         modifier = Modifier
@@ -259,11 +263,12 @@ fun Generation(title: String, subTitle: String, context: Context) {
 
 
 @Composable
-fun SheetContentScreen(getResponse: String) {
+fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.9f),
+            .fillMaxHeight(0.9f)
+            .verticalScroll(rememberScrollState()),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         colors = CardColors(
             containerColor = Color.White, contentColor = Color.Black,
@@ -274,8 +279,10 @@ fun SheetContentScreen(getResponse: String) {
             text = getResponse, textAlign = TextAlign.Justify, fontSize = 14.sp,
             modifier = Modifier
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
         )
+        if (viewModal.isloadingAnimation.collectAsState().value) {
+            LoadingAnimation(circleSize = 10.dp, spaceBetween = 4.dp, travelDistance = 10.dp)
+        }
     }
 }
 
@@ -313,50 +320,3 @@ fun ToolsHeader(title: String, context: Context) {
     )
 }
 
-fun PromptCase(title: String): String {
-    if (title == ToolItem.MailGeneration.title) {
-        return ToolItem.MailGeneration.toolPrompt
-    } else if (title == ToolItem.BlogGeneration.title) {
-        return ToolItem.BlogGeneration.toolPrompt
-    } else if (title == ToolItem.BlogSection.title) {
-        return ToolItem.BlogSection.toolPrompt
-    } else if (title == ToolItem.BlogIdeas.title) {
-        return ToolItem.BlogIdeas.toolPrompt
-    } else if (title == ToolItem.ParagraphGenerator.title) {
-        return ToolItem.ParagraphGenerator.toolPrompt
-    } else if (title == ToolItem.GenerateArticle.title) {
-        return ToolItem.GenerateArticle.toolPrompt
-    } else if (title == ToolItem.CreativeStory.title) {
-        return ToolItem.CreativeStory.toolPrompt
-    } else if (title == ToolItem.CreativeLetter.title) {
-        return ToolItem.CreativeLetter.toolPrompt
-    } else if (title == ToolItem.LoveLetter.title) {
-        return ToolItem.LoveLetter.toolPrompt
-    } else if (title == ToolItem.Poems.title) {
-        return ToolItem.Poems.toolPrompt
-    } else if (title == ToolItem.SongLyrics.title) {
-        return ToolItem.SongLyrics.toolPrompt
-    } else if (title == ToolItem.FoodRecipe.title) {
-        return ToolItem.FoodRecipe.toolPrompt
-    } else if (title == ToolItem.GrammerCorrection.title) {
-        return ToolItem.GrammerCorrection.toolPrompt
-    } else if (title == ToolItem.AnswerQuestion.title) {
-        return ToolItem.AnswerQuestion.toolPrompt
-    } else if (title == ToolItem.ActivePassive.title) {
-        return ToolItem.ActivePassive.toolPrompt
-    } else if (title == ToolItem.PassiveActive.title) {
-        return ToolItem.PassiveActive.toolPrompt
-    } else if (title == ToolItem.JobDescription.title) {
-        return ToolItem.JobDescription.toolPrompt
-    } else if (title == ToolItem.Resume.title) {
-        return ToolItem.Resume.toolPrompt
-    } else if (title == ToolItem.InterviewQuestions.title) {
-        return ToolItem.InterviewQuestions.toolPrompt
-    } else if (title == ToolItem.TextSummarizer.title) {
-        return ToolItem.TextSummarizer.toolPrompt
-    } else if (title == ToolItem.StorySummarizer.title) {
-        return ToolItem.StorySummarizer.toolPrompt
-    } else {
-        return ToolItem.ParagraphSummarizer.toolPrompt
-    }
-}

@@ -16,6 +16,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -78,26 +80,27 @@ import coil.size.Size
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.mohdsaifansari.mindtek.AITool.MainAiToolScreen
 import com.mohdsaifansari.mindtek.Account.EditProfile
+import com.mohdsaifansari.mindtek.Account.ProfileItemScreen
+import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.Account.ProfilePicture
 import com.mohdsaifansari.mindtek.Account.ProfileScreen
 import com.mohdsaifansari.mindtek.Account.ProfileViewModel
 import com.mohdsaifansari.mindtek.Authentication.SignInScreen
 import com.mohdsaifansari.mindtek.Authentication.SignUpScreen
-import com.mohdsaifansari.mindtek.Database.ChatDatabaseProvider
-import com.mohdsaifansari.mindtek.Database.DatabaseProvider
-import com.mohdsaifansari.mindtek.AITool.MainAiToolScreen
-import com.mohdsaifansari.mindtek.Account.ProfileItemScreen
 import com.mohdsaifansari.mindtek.ChatBot.ChatUiState
 import com.mohdsaifansari.mindtek.ChatBot.ChatViewModel
 import com.mohdsaifansari.mindtek.ChatBot.MainHeader
 import com.mohdsaifansari.mindtek.ChatBot.ModalChatBox
 import com.mohdsaifansari.mindtek.ChatBot.UserUriChatBox
 import com.mohdsaifansari.mindtek.Components.BottomNavItem
+import com.mohdsaifansari.mindtek.Components.LoadingAnimation
 import com.mohdsaifansari.mindtek.Components.LogInItem
 import com.mohdsaifansari.mindtek.Components.MainBottomNavigation
 import com.mohdsaifansari.mindtek.Data.DrawerItem
-import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
+import com.mohdsaifansari.mindtek.Database.ChatDatabaseProvider
+import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.History.ResultScreen
 import com.mohdsaifansari.mindtek.History.ToolHistory
@@ -402,25 +405,38 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 chatViewModel.checkChatData(context, db = ChatDatabaseProvider.chatDatabase)
             }
-            LazyColumn(
-                modifier = Modifier
+            if (chatViewModel.iscircularloading.collectAsState().value) {
+                Box(modifier = Modifier
                     .weight(1f)
-                    .fillMaxSize()
-                    .padding(8.dp),
-                reverseLayout = true
-            ) {
-                itemsIndexed(chatState.chatList) { index, chat ->
-                    if (chat != null) {
-                        if (chat.isUser) {
-                            UserUriChatBox(prompt = chat.message, imageUri = chat.imageAddress)
-                        } else {
-                            ModalChatBox(response = chat.message)
+                    .fillMaxWidth()) {
+                    CircularProgressIndicator(
+                        color = Color(160, 166, 181, 255), modifier = Modifier.align(
+                            Alignment.Center
+                        )
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    reverseLayout = true
+                ) {
+                    itemsIndexed(chatState.chatList) { index, chat ->
+                        if (chat != null) {
+                            if (chat.isUser) {
+                                UserUriChatBox(prompt = chat.message, imageUri = chat.imageAddress)
+                            } else {
+                                ModalChatBox(response = chat.message)
+                            }
                         }
                     }
                 }
             }
-
-
+            if (chatViewModel.isloadingAnimation.collectAsState().value) {
+                LoadingAnimation(circleSize = 14.dp, spaceBetween = 6.dp, travelDistance = 12.dp)
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -239,7 +239,7 @@ class SummarizerActivity : ComponentActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show();
                             }
-                        viewmodel.sendMessage(PromptCase(title = title) + inputText)
+                        viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
                         showBottomSheet = true
                     }, enabled = isEnabledButton,
                     modifier = Modifier
@@ -309,7 +309,10 @@ class SummarizerActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        SheetContentScreen(outputMessage.substring(1, (outputMessage.length - 1)))
+                        SheetContentScreen(
+                            outputMessage.substring(1, (outputMessage.length - 1)),
+                            viewmodel
+                        )
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
