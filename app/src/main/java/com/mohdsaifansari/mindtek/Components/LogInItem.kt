@@ -12,6 +12,8 @@ sealed class LogInItem(val route: String) {
     object ProfileItemScreen : LogInItem(route = "Profile_Item_Screen")
     object ResultNav : LogInItem(route = "Result_nav/{result}")
     object ResultScreen : LogInItem(route = "Result_Screen")
+    object SettingNav : LogInItem(route = "Setting_nav")
+    object SettingScreen : LogInItem(route = "Setting_Screen")
 
 
 }

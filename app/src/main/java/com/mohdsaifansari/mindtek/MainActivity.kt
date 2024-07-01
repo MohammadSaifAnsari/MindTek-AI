@@ -36,11 +36,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -48,7 +50,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +71,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -104,8 +112,13 @@ import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.History.ResultScreen
 import com.mohdsaifansari.mindtek.History.ToolHistory
+import com.mohdsaifansari.mindtek.Setting.SettingScreen
+import com.mohdsaifansari.mindtek.Setting.ThemePreference
+import com.mohdsaifansari.mindtek.Setting.dataStore
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -124,23 +137,43 @@ class MainActivity : ComponentActivity() {
     }
     val context = this@MainActivity
     private val auth: FirebaseAuth by lazy { Firebase.auth }
-    val firebaseAuth = FirebaseAuth.getInstance()
-
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    var isDarkTheme by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
+        var keepSplashScreenVisible = true
+        splashScreen.setKeepOnScreenCondition { keepSplashScreenVisible }
+
+        lifecycleScope.launch {
+            val themePreference = ThemePreference(context.dataStore)
+            isDarkTheme = themePreference.readThemePreferences().first()
+            delay(2000)
+            keepSplashScreenVisible = false
+        }
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                Color(220, 226, 241, 255).toArgb(),
-                Color.Transparent.toArgb()
-            ), navigationBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                Color.Transparent.toArgb()
-            )
+            statusBarStyle = if (isDarkTheme) {
+                SystemBarStyle.light(
+                    Color(220, 226, 241, 255).toArgb(),
+                    Color(64, 82, 100, 255).toArgb()
+                )
+
+            } else {
+                SystemBarStyle.light(
+                    Color(64, 82, 100, 255).toArgb(),
+                    Color(220, 226, 241, 255).toArgb()
+                )//start
+            }
         )
         setContent {
-            MindtekTheme {
+            val themePreference = remember { ThemePreference(context.dataStore) }
+            LaunchedEffect(Unit) {
+                themePreference.readThemePreferences().collect {
+                    isDarkTheme = it
+                }
+            }
+            MindtekTheme(darkTheme = isDarkTheme) {
                 DatabaseProvider.initialize(this@MainActivity)
                 ChatDatabaseProvider.initialize(this@MainActivity)
                 ToolHistoryDatabaseProvider.initialize(this@MainActivity)
@@ -204,6 +237,14 @@ class MainActivity : ComponentActivity() {
                             ProfileItemScreen(navController = navControllerSign, context = context)
                         }
                     }
+                    navigation(
+                        startDestination = LogInItem.SettingScreen.route,
+                        route = LogInItem.SettingNav.route
+                    ) {
+                        composable(LogInItem.SettingScreen.route) {
+                            SettingScreen(navController = navControllerSign, context = context)
+                        }
+                    }
 
                 }
             }
@@ -226,7 +267,10 @@ class MainActivity : ComponentActivity() {
             DrawerItem(R.drawable.logout, "Logout")
         )
         ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
-            ModalDrawerSheet(drawerContainerColor = Color.White, drawerContentColor = Color.Black) {
+            ModalDrawerSheet(
+                drawerContainerColor = MaterialTheme.colorScheme.background,
+                drawerContentColor = MaterialTheme.colorScheme.onBackground
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -234,8 +278,8 @@ class MainActivity : ComponentActivity() {
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFFDCE2F1), // #dee4f4
-                                    Color(0xFFFFFFFF)
+                                    MaterialTheme.colorScheme.primary, // #dee4f4
+                                    MaterialTheme.colorScheme.background
                                 ), start = Offset(0f, 0f),
                                 end = Offset(0f, Float.POSITIVE_INFINITY)
                             )
@@ -259,14 +303,15 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(start = 22.dp, top = 2.dp),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.Black, fontFamily = FontFamily.Serif
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontFamily = FontFamily.Serif
                         )
                         Text(
                             text = it.email,
                             modifier = Modifier.padding(start = 22.dp, top = 2.dp),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -277,7 +322,7 @@ class MainActivity : ComponentActivity() {
                         label = {
                             Text(
                                 text = item.title,
-                                color = if (item.title == "Logout") Color.Red else Color.Black,
+                                color = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground,
                                 fontFamily = FontFamily.Serif
                             )
                         },
@@ -296,12 +341,18 @@ class MainActivity : ComponentActivity() {
                                     restoreState = true
                                 }
                             } else if (item.title == "Setting") {
-                                Toast.makeText(context, "Setting", Toast.LENGTH_SHORT).show()
+                                navControllerSign.navigate(LogInItem.SettingNav.route) {
+                                    popUpTo(LogInItem.HomeScreen.route) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = Color.White,
-                            selectedContainerColor = Color(220, 226, 241, 255)
+                            unselectedContainerColor = MaterialTheme.colorScheme.background,
+                            selectedContainerColor = MaterialTheme.colorScheme.primary
                         ),
                         icon = {
                             Icon(
@@ -310,7 +361,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .background(Color.Transparent)
                                     .size(24.dp),
-                                tint = if (item.title == "Logout") Color.Red else Color.Black
+                                tint = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     )
@@ -394,8 +445,8 @@ class MainActivity : ComponentActivity() {
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFDCE2F1), // #dee4f4
-                            Color(0xFFFFFFFF)
+                            MaterialTheme.colorScheme.primary, // #dee4f4
+                            MaterialTheme.colorScheme.background
                         ), start = Offset(0f, 0f),
                         end = Offset(0f, Float.POSITIVE_INFINITY)
                     )
@@ -406,11 +457,13 @@ class MainActivity : ComponentActivity() {
                 chatViewModel.checkChatData(context, db = ChatDatabaseProvider.chatDatabase)
             }
             if (chatViewModel.iscircularloading.collectAsState().value) {
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
                     CircularProgressIndicator(
-                        color = Color(160, 166, 181, 255), modifier = Modifier.align(
+                        color = MaterialTheme.colorScheme.surface, modifier = Modifier.align(
                             Alignment.Center
                         )
                     )
@@ -481,9 +534,18 @@ class MainActivity : ComponentActivity() {
                                             .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                             .build()
                                     )
-                                }, tint = Color(140, 149, 192, 255)
+                                }, tint = MaterialTheme.colorScheme.secondary
                         )
-                    }
+                    }, colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                        focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                        focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
@@ -501,7 +563,7 @@ class MainActivity : ComponentActivity() {
                             )
                             uriState.update { "" }
                         }
-                        .background(Color.Transparent), tint = Color(140, 149, 192, 255)
+                        .background(Color.Transparent), tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }

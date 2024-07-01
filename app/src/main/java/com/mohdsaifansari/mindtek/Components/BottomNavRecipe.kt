@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
@@ -29,8 +30,8 @@ fun MainBottomNavigation(navController: NavController) {
         BottomNavItem.Profile
     )
     BottomAppBar(
-        containerColor = Color.White,
-        contentColor = Color.Black,
+        containerColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.height(95.dp)
     ) {
         val navStack by navController.currentBackStackEntryAsState()
@@ -62,10 +63,13 @@ fun MainBottomNavigation(navController: NavController) {
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemColors(
-                    selectedIconColor = Color(70, 76, 91, 255),
-                    unselectedIconColor = Color.Gray, selectedTextColor = Color(70, 76, 91, 255),
-                    unselectedTextColor = Color.Gray, disabledTextColor = Color.LightGray,
-                    disabledIconColor = Color.LightGray, selectedIndicatorColor = Color.Transparent
+                    selectedIconColor = MaterialTheme.colorScheme.tertiary,
+                    unselectedIconColor = Color.Gray,
+                    selectedTextColor = MaterialTheme.colorScheme.tertiary,
+                    unselectedTextColor = Color.Gray,
+                    disabledTextColor = Color.LightGray,
+                    disabledIconColor = Color.LightGray,
+                    selectedIndicatorColor = Color.Transparent
                 )
 
             )

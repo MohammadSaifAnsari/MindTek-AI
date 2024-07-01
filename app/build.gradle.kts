@@ -106,6 +106,10 @@ dependencies {
     //Glide
     implementation (libs.compose)
 
+    //DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

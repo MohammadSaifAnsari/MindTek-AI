@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -77,8 +79,8 @@ fun ProfileScreen(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -113,13 +115,15 @@ fun ProfileScreen(
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 modifier = Modifier.padding(5.dp),
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
             //Email
             Text(
                 text = it.email, fontWeight = FontWeight.Light, fontSize = 15.sp,
                 modifier = Modifier.padding(bottom = 14.dp),
-                fontFamily = FontFamily.SansSerif
+                fontFamily = FontFamily.SansSerif,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -199,10 +203,10 @@ fun ProfileItemRow(
                     modifier = Modifier
                         .size(40.dp)
                         .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp),
-                    if (item == "Logout") {
+                    tint = if (item == "Logout") {
                         colorResource(id = R.color.red)
                     } else {
-                        colorResource(id = R.color.black)
+                        MaterialTheme.colorScheme.onBackground
                     }
                 )
                 Text(
@@ -213,7 +217,7 @@ fun ProfileItemRow(
                     color = if (item == "Logout") {
                         Color.Red
                     } else {
-                        Color.Black
+                        MaterialTheme.colorScheme.onBackground
                     }
                 )
             }
@@ -223,7 +227,7 @@ fun ProfileItemRow(
                     modifier = Modifier
                         .size(50.dp)
                         .padding(top = 4.dp, bottom = 4.dp, start = 16.dp, end = 8.dp)
-                        .background(Color.Transparent), tint = Color.Black
+                        .background(Color.Transparent), tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

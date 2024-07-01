@@ -70,7 +70,7 @@ fun LoadingAnimation(
             .height(40.dp)
             .background(
                 shape = RoundedCornerShape(20.dp),
-                color = Color(220, 226, 241, 255)
+                color = MaterialTheme.colorScheme.secondary
             ),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically

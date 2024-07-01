@@ -8,8 +8,11 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +26,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -34,8 +39,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -105,8 +112,8 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFDCE2F1), // #dee4f4
-                            Color(0xFFFFFFFF)
+                            MaterialTheme.colorScheme.primary, // #dee4f4
+                            MaterialTheme.colorScheme.background
                         ), start = Offset(0f, 0f),
                         end = Offset(0f, Float.POSITIVE_INFINITY)
                     )
@@ -121,7 +128,8 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
             OutlinedTextField(
                 modifier = Modifier
@@ -135,7 +143,15 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 placeholder = {
                     Text(text = "Type a prompt")
                 },
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                )
             )
             if (text.isNotEmpty()) {
                 isEnabledButton = true
@@ -158,9 +174,13 @@ fun Generation(title: String, subTitle: String, context: Context) {
                         }
                     viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
                     showBottomSheet = true
-                }, enabled = isEnabledButton
+                }, enabled = isEnabledButton,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
-                Text(text = "Generate")
+                Text(text = "Generate", color = MaterialTheme.colorScheme.onBackground)
             }
 
         }
@@ -178,35 +198,38 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(220, 226, 241, 255))
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(Color(220, 226, 241, 255))
+                            .background(MaterialTheme.colorScheme.primary),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         IconButton(
                             onClick = {
                                 showBottomSheet = false
                             }, modifier = Modifier
                                 .padding(4.dp)
-                                .align(Alignment.CenterStart)
                         ) {
                             Icon(
-                                Icons.Default.Close, contentDescription = null,
+                                Icons.Default.Close,
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .background(Color.Transparent), tint = Color.Black
+                                    .background(Color.Transparent),
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
                         IconButton(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(outputMessage))
                                 Toast.makeText(context, "Copied ", Toast.LENGTH_SHORT).show()
                             }, modifier = Modifier
                                 .padding(4.dp)
-                                .align(Alignment.CenterEnd)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.copytext),
@@ -214,7 +237,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
                                 modifier = Modifier
                                     .size(24.dp)
                                     .background(Color.Transparent),
-                                tint = Color.Black
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -227,7 +250,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(Color(220, 226, 241, 255))
+                            .background(MaterialTheme.colorScheme.primary)
                     ) {
                         IconButton(
                             onClick = {
@@ -237,10 +260,12 @@ fun Generation(title: String, subTitle: String, context: Context) {
                                 .align(Alignment.Center)
                         ) {
                             Icon(
-                                Icons.Default.Delete, contentDescription = null,
+                                Icons.Default.Delete,
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .background(Color.Transparent), tint = Color.Black
+                                    .background(Color.Transparent),
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -249,7 +274,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
         }
         if ((isEnabledButton == false) && inputText.isNotEmpty() && outputMessage.isNotEmpty() && (showBottomSheet == false)) {
             Log.d("tool1234", inputText + outputMessage + title)
-            savedData(inputText, outputMessage, title, context)
+            viewmodel.savedData(inputText, outputMessage, title, context)
         }
         if (showDialog) {
             Dialog(onDismissRequest = { showDialog = false }) {
@@ -271,8 +296,10 @@ fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal) {
             .verticalScroll(rememberScrollState()),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         colors = CardColors(
-            containerColor = Color.White, contentColor = Color.Black,
-            disabledContainerColor = Color.White, disabledContentColor = Color.Black
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            disabledContainerColor = MaterialTheme.colorScheme.background,
+            disabledContentColor = MaterialTheme.colorScheme.onBackground
         )
     ) {
         Text(
@@ -294,18 +321,20 @@ fun ToolsHeader(title: String, context: Context) {
             Text(
                 text = title, modifier = Modifier.padding(5.dp),
                 fontStyle = FontStyle.Normal,
-                fontFamily = FontFamily.Serif
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = Color.White
         ), navigationIcon = {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
@@ -314,7 +343,8 @@ fun ToolsHeader(title: String, context: Context) {
                         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                         context.startActivity(intent)
                     },
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     )

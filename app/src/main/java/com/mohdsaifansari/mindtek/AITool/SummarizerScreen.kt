@@ -6,10 +6,12 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
@@ -36,14 +38,14 @@ fun SummarizerHeader(title: String, context: Context) {
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = Color.White
         ), navigationIcon = {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {

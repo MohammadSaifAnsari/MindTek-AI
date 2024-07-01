@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +83,7 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .imePadding(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -88,12 +91,14 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
             Text(
                 text = "Register",
                 modifier = Modifier.padding(top = 4.dp, bottom = 10.dp),
-                fontSize = 25.sp, fontWeight = FontWeight.Bold
+                fontSize = 25.sp, fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Join the AI revolution with the Mindtek",
                 modifier = Modifier.padding(top = 4.dp, bottom = 30.dp),
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground
             )
             OutlinedTextField(
                 modifier = Modifier
@@ -109,7 +114,17 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                 shape = RoundedCornerShape(16.dp),
                 label = {
                     Text(text = "First Name")
-                }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                )
             )
             Spacer(
                 modifier = Modifier
@@ -130,7 +145,17 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                 shape = RoundedCornerShape(16.dp),
                 label = {
                     Text(text = "Last Name")
-                }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                )
             )
             Spacer(
                 modifier = Modifier
@@ -156,7 +181,19 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     if (isErrorinEmail) {
                         Text(text = "Enter a valid email address")
                     }
-                }, isError = isErrorinEmail
+                },
+                isError = isErrorinEmail,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
+                    errorTextColor = MaterialTheme.colorScheme.onBackground
+                )
             )
             Spacer(
                 modifier = Modifier
@@ -177,7 +214,17 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                 shape = RoundedCornerShape(16.dp),
                 label = {
                     Text(text = "Password")
-                }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                )
             )
             if (firstNametext.isNotEmpty() && lastNametext.isNotEmpty() && passwordtext.isNotEmpty() && emailtext.isNotEmpty() && (isErrorinEmail == false)) {
                 isEnabledButton = true
@@ -199,14 +246,18 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                 modifier = Modifier
                     .padding(top = 30.dp)
                     .fillMaxWidth(0.5f),
-                enabled = isEnabledButton
+                enabled = isEnabledButton,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
-                if (viewModel.isloadingAnimation.collectAsState().value){
+                if (viewModel.isloadingAnimation.collectAsState().value) {
                     CircularProgressIndicator(
-                        color = Color(160, 166, 181, 255)
+                        color = MaterialTheme.colorScheme.tertiary
                     )
-                }else{
-                    Text(text = "Sign Up")
+                } else {
+                    Text(text = "Sign Up", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
             Spacer(
@@ -247,7 +298,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     text = "Already have an account? ",
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 5.dp)
+                    modifier = Modifier.padding(start = 5.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 ClickableText(text = AnnotatedString(buildAnnotatedString {
                     withStyle(

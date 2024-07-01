@@ -1,19 +1,23 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,16 +34,20 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -62,11 +71,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
-import com.mohdsaifansari.mindtek.AITool.ui.theme.MindtekTheme
 import com.mohdsaifansari.mindtek.Data.Date
+import com.mohdsaifansari.mindtek.R
+import com.mohdsaifansari.mindtek.Setting.ThemePreference
+import com.mohdsaifansari.mindtek.Setting.dataStore
+import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
@@ -85,15 +96,32 @@ class SummarizerActivity : ComponentActivity() {
         }
 
     }
-    val firestore = FirebaseFirestore.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val context = this@SummarizerActivity
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color(220, 226, 241, 255).toArgb(),
+                Color.Transparent.toArgb()
+            ), navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            )
+        )
         setContent {
-            MindtekTheme {
+            val themePreference = remember { ThemePreference(context.dataStore) }
+            var isDarkTheme by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                themePreference.readThemePreferences().collect {
+                    isDarkTheme = it
+                }
+            }
+            MindtekTheme(darkTheme = isDarkTheme) {
                 val tool_title = intent.getStringExtra("TOOL_TITLE")
                 val tool_subtitle = intent.getStringExtra("TOOL_SUBTITLE")
                 if ((tool_title == ToolItem.TextSummarizer.title) || (tool_title == ToolItem.StorySummarizer.title) || (tool_title == ToolItem.ParagraphSummarizer.title)) {
@@ -151,8 +179,8 @@ class SummarizerActivity : ComponentActivity() {
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFFDCE2F1), // #dee4f4
-                                Color(0xFFFFFFFF)
+                                MaterialTheme.colorScheme.primary, // #dee4f4
+                                MaterialTheme.colorScheme.background
                             ), start = Offset(0f, 0f),
                             end = Offset(0f, Float.POSITIVE_INFINITY)
                         )
@@ -166,7 +194,8 @@ class SummarizerActivity : ComponentActivity() {
                     fontSize = 18.sp,
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif
+                    fontFamily = FontFamily.Serif,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Box(
                     modifier = Modifier
@@ -186,7 +215,15 @@ class SummarizerActivity : ComponentActivity() {
                         placeholder = {
                             Text(text = "Type a prompt")
                         },
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                            focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                        )
                     )
                     if (text.isEmpty() && extractedText.value.isEmpty()) {
                         path = uri
@@ -211,10 +248,12 @@ class SummarizerActivity : ComponentActivity() {
                             shape = CircleShape
                         ) {
                             Icon(
-                                Icons.Default.AddCircle, contentDescription = null,
+                                Icons.Default.AddCircle,
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(100.dp)
-                                    .background(Color.White), tint = Color(160, 166, 181, 255)
+                                    .background(MaterialTheme.colorScheme.background),
+                                tint = Color(160, 166, 181, 255)
                             )
                         }
                     }
@@ -241,13 +280,22 @@ class SummarizerActivity : ComponentActivity() {
                             }
                         viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
                         showBottomSheet = true
-                    }, enabled = isEnabledButton,
+                    },
+                    enabled = isEnabledButton,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
-                        .padding(start = 20.dp, top = 4.dp, end = 20.dp, bottom = 4.dp)
+                        .padding(start = 20.dp, top = 4.dp, end = 20.dp, bottom = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                    )
                 ) {
-                    Text(text = "Summarize", fontSize = 20.sp)
+                    Text(
+                        text = "Summarize",
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
             }
@@ -265,28 +313,32 @@ class SummarizerActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(220, 226, 241, 255))
+                            .background(MaterialTheme.colorScheme.primary)
                     ) {
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
-                                .background(Color(220, 226, 241, 255))
+                                .background(MaterialTheme.colorScheme.primary),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
                             IconButton(
                                 onClick = {
                                     showBottomSheet = false
                                 }, modifier = Modifier
                                     .padding(4.dp)
-                                    .align(Alignment.CenterStart)
                             ) {
                                 Icon(
-                                    Icons.Default.Close, contentDescription = null,
+                                    Icons.Default.Close,
+                                    contentDescription = null,
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .background(Color.Transparent), tint = Color.Black
+                                        .background(Color.Transparent),
+                                    tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
+                            Spacer(modifier = Modifier.weight(1f))
                             IconButton(
                                 onClick = {
                                     clipboardManager.setText(AnnotatedString(outputMessage))
@@ -297,7 +349,6 @@ class SummarizerActivity : ComponentActivity() {
                                     ).show()
                                 }, modifier = Modifier
                                     .padding(4.dp)
-                                    .align(Alignment.CenterEnd)
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.copytext),
@@ -305,7 +356,7 @@ class SummarizerActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .size(24.dp)
                                         .background(Color.Transparent),
-                                    tint = Color.Black
+                                    tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }
@@ -317,7 +368,7 @@ class SummarizerActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
-                                .background(Color(220, 226, 241, 255))
+                                .background(MaterialTheme.colorScheme.primary)
                         ) {
                             IconButton(
                                 onClick = {
@@ -327,10 +378,12 @@ class SummarizerActivity : ComponentActivity() {
                                     .align(Alignment.Center)
                             ) {
                                 Icon(
-                                    Icons.Default.Delete, contentDescription = null,
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .background(Color.Transparent), tint = Color.Black
+                                        .background(Color.Transparent),
+                                    tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }
@@ -340,57 +393,16 @@ class SummarizerActivity : ComponentActivity() {
                 }
             }
             if ((isEnabledButton == false) && inputText.isNotEmpty() && outputMessage.isNotEmpty()) {
-                savedData(inputText, outputMessage, title, this@SummarizerActivity)
+                viewmodel.savedData(inputText, outputMessage, title, this@SummarizerActivity)
             }
             viewmodel.list.clear()
             isEnabledButton = false
         }
 
     }
-
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun savedData(prompt: String, result: String, title: String, context: Context) {
-    val firestore = FirebaseFirestore.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
-    val uid = firebaseAuth.currentUser?.uid.toString()
-    val date = date()
 
-
-    firestore.collection("History").document(uid).get().addOnSuccessListener { documentSnapshot ->
-        val count = documentSnapshot.getLong("Count")
-        val data = hashMapOf(
-            "idNo" to count,
-            "toolTitle" to title,
-            "Prompt" to prompt,
-            "Result" to result,
-            "DayOfMonth" to date.dayofMonth,
-            "Month" to date.month,
-            "Year" to date.year
-        )
-        firestore.collection("History").document(uid).collection("ToolHistory").add(data)
-            .addOnFailureListener {
-                Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
-            }
-    }.addOnFailureListener {
-        Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
-    }
-
-    //start
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun date(): Date {
-    val currentDate = LocalDate.now()
-    val year = currentDate.year
-    val month = currentDate.month
-    val dayOfMonth = currentDate.dayOfMonth
-    return Date(
-        dayOfMonth.toString(), month.toString(), year.toString()
-    )
-
-}
 
 
 

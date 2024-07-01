@@ -38,8 +38,8 @@ fun ModalChatBox(response: String) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardColors(
-            containerColor = Color.White,
-            contentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             disabledContainerColor = Color.Transparent,
             disabledContentColor = Color.Transparent
         ),
@@ -51,7 +51,7 @@ fun ModalChatBox(response: String) {
                 .padding(12.dp)
                 .background(Color.Transparent)
                 .clip(RoundedCornerShape(12.dp)),
-            text = response, fontSize = 15.sp, color = Color.Black
+            text = response, fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground
         )
     }
 
@@ -68,8 +68,8 @@ fun UserUriChatBox(prompt: String, imageUri: String) {
         Card(
             shape = RoundedCornerShape(8.dp),
             colors = CardColors(
-                containerColor = Color(140, 149, 192, 255),
-                contentColor = Color.Black,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 disabledContainerColor = Color.Transparent,
                 disabledContentColor = Color.Transparent
             ),
@@ -95,7 +95,7 @@ fun UserUriChatBox(prompt: String, imageUri: String) {
                     .padding(bottom = 12.dp, top = 12.dp, start = 12.dp, end = 12.dp)
                     .background(Color.Transparent)
                     .clip(RoundedCornerShape(12.dp)),
-                text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary
+                text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -116,11 +116,11 @@ fun MainHeader(
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
-            scrolledContainerColor = Color.Black
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+            scrolledContainerColor = MaterialTheme.colorScheme.onBackground
         ), navigationIcon = {
             IconButton(onClick = {
                 coroutineScope.launch {

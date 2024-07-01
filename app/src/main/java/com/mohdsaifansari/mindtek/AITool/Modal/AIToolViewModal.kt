@@ -1,20 +1,32 @@
 package com.mohdsaifansari.mindtek.AITool.Modal
 
+import android.content.Context
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.Apikey
+import com.mohdsaifansari.mindtek.Data.Date
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class AIToolViewModal : ViewModel() {
 
     private val _isloadingAnimation = MutableStateFlow<Boolean>(true)
     val isloadingAnimation: StateFlow<Boolean> = _isloadingAnimation.asStateFlow()
+
+    private val firestore = FirebaseFirestore.getInstance()
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val uid = firebaseAuth.currentUser?.uid.toString()
 
     val list by lazy {
         mutableStateListOf<String>()
@@ -34,6 +46,42 @@ class AIToolViewModal : ViewModel() {
             fullResponse += chunk.text
             _isloadingAnimation.value = false
         }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun savedData(prompt: String, result: String, title: String, context: Context) {
+        val date = date()
+        firestore.collection("History").document(uid).get()
+            .addOnSuccessListener { documentSnapshot ->
+                val count = documentSnapshot.getLong("Count")
+                val data = hashMapOf(
+                    "idNo" to count,
+                    "toolTitle" to title,
+                    "Prompt" to prompt,
+                    "Result" to result,
+                    "DayOfMonth" to date.dayofMonth,
+                    "Month" to date.month,
+                    "Year" to date.year
+                )
+                firestore.collection("History").document(uid).collection("ToolHistory").add(data)
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+                    }
+            }.addOnFailureListener {
+            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun date(): Date {
+        val currentDate = LocalDate.now()
+        val year = currentDate.year
+        val month = currentDate.month
+        val dayOfMonth = currentDate.dayOfMonth
+        return Date(
+            dayOfMonth.toString(), month.toString(), year.toString()
+        )
 
     }
 

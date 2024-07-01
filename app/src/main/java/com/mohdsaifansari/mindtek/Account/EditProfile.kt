@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -27,9 +28,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -122,8 +126,8 @@ fun MainContentEditProfile(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -174,7 +178,8 @@ fun MainContentEditProfile(
             fontWeight = FontWeight.Normal,
             fontSize = 15.sp,
             modifier = Modifier.padding(5.dp),
-            fontFamily = FontFamily.Serif
+            fontFamily = FontFamily.Serif,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(25.dp))
 
@@ -190,7 +195,8 @@ fun MainContentEditProfile(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(3.dp),
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             OutlinedTextField(
@@ -203,7 +209,15 @@ fun MainContentEditProfile(
                 placeholder = {
                     Text(text = "First Name")
                 },
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                )
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -219,7 +233,8 @@ fun MainContentEditProfile(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(3.dp),
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             OutlinedTextField(
@@ -232,7 +247,15 @@ fun MainContentEditProfile(
                 placeholder = {
                     Text(text = "Last Name")
                 },
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                )
             )
         }
         Spacer(modifier = Modifier.height(40.dp))
@@ -248,7 +271,7 @@ fun MainContentEditProfile(
         ) {
             if (viewModel.iscircularloading.collectAsState().value) {
                 CircularProgressIndicator(
-                    color = Color(160, 166, 181, 255)
+                    color = MaterialTheme.colorScheme.surface
                 )
             } else {
                 Text(
@@ -256,7 +279,7 @@ fun MainContentEditProfile(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -275,18 +298,19 @@ fun EditProfileHeader(navController: NavController) {
                 modifier = Modifier.padding(5.dp),
                 fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = Color.White
         ), navigationIcon = {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowLeft,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
@@ -298,7 +322,8 @@ fun EditProfileHeader(navController: NavController) {
                             restoreState = true
                         }
                     },
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     )

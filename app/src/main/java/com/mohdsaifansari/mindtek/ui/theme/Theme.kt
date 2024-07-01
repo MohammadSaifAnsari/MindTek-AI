@@ -1,6 +1,5 @@
 package com.mohdsaifansari.mindtek.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,15 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = dark_Primary_Color,
+    secondary = dark_Secondary_Color,
+    tertiary = dark_tertiary_Color,
+    background = dark_Background_Color,
+    surface = dark_Surface_Color,
+    onBackground = dark_OnBackground_Color, onSurface = dark_OnSurface_Color
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = light_Primary_Color,
+    secondary = light_Secondary_Color,
+    tertiary = light_tertiary_Color,
+    background = light_Background_Color,
+    surface = light_Surface_Color,
+    onBackground = light_OnBackground_Color, onSurface = light_OnSurface_Color
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,7 +42,7 @@ private val LightColorScheme = lightColorScheme(
 fun MindtekTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

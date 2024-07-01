@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -80,8 +81,8 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -95,7 +96,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             Text(
                 text = "Summarizer",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
@@ -103,14 +104,14 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             Text(
                 text = "Content Writing Tools",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold
             )
             ScrollableCardView(itemContent, context)
             Text(
                 text = "Writer",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
@@ -118,7 +119,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             Text(
                 text = "Grammar",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
@@ -126,7 +127,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
             Text(
                 text = "Job Essentials",
                 modifier = Modifier.padding(8.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
@@ -155,8 +156,8 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                     },
                 shape = RoundedCornerShape(8.dp),
                 colors = CardColors(
-                    containerColor = Color(hexadecimal.toColorInt()),
-                    contentColor = Color.Black,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
                     disabledContentColor = Color.Transparent,
                     disabledContainerColor = Color.Transparent
                 )
@@ -166,7 +167,7 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(12.dp),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontFamily = FontFamily.Serif
                 )
                 Image(

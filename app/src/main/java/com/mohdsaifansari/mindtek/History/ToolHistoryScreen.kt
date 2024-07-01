@@ -26,6 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -73,8 +74,8 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -116,7 +117,8 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
                 text = "No History",
                 modifier = Modifier.align(Alignment.Center),
                 fontSize = 20.sp,
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                color = MaterialTheme.colorScheme.onBackground
             )
         } else {
             ScrollableHistoryView(items = historyItems, navController, viewModel, context)
@@ -126,7 +128,7 @@ fun ToolHistory(paddingValues: PaddingValues, context: Context, navController: N
         PullToRefreshContainer(
             state = pullToRefreshState,
             modifier = Modifier.align(Alignment.TopCenter),
-            containerColor = Color(220, 226, 241, 255)
+            containerColor = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -165,7 +167,7 @@ fun ScrollableHistoryView(
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color("#F7F7FD".toColorInt())),
+                        .background(MaterialTheme.colorScheme.onSurface),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
@@ -192,14 +194,16 @@ fun ScrollableHistoryView(
                                 textAlign = TextAlign.Center, fontSize = 18.sp,
                                 modifier = Modifier.padding(3.dp),
                                 maxLines = 1,
-                                softWrap = true, fontFamily = FontFamily.SansSerif
+                                softWrap = true, fontFamily = FontFamily.SansSerif,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         if ((item.month != "null") && (item.year != "null") && (item.day != "null")) {
                             val text = item.month + " " + item.day + "," + item.year
                             Text(
                                 text = text, textAlign = TextAlign.Center, fontSize = 14.sp,
-                                modifier = Modifier.padding(3.dp)
+                                modifier = Modifier.padding(3.dp),
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -210,15 +214,20 @@ fun ScrollableHistoryView(
                             modifier = Modifier
                                 .background(Color.Transparent)
                                 .clickable { expandedDropDownMenu = !expandedDropDownMenu },
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                         DropdownMenu(
                             expanded = expandedDropDownMenu,
                             onDismissRequest = { expandedDropDownMenu = false },
-                            modifier = Modifier.background(Color.White)
+                            modifier = Modifier.background(MaterialTheme.colorScheme.background)
                         ) {
                             menuList.forEach { label ->
-                                DropdownMenuItem(text = { Text(text = label) }, onClick = {
+                                DropdownMenuItem(text = {
+                                    Text(
+                                        text = label,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }, onClick = {
                                     selectedItem = label
                                     expandedDropDownMenu = false
                                     if (label == "Delete") {

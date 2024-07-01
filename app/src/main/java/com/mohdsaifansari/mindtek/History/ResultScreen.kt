@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -74,8 +75,8 @@ fun ResultMainScreen(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -115,10 +116,10 @@ fun ResultHeader(resultText: String?, context: Context, navController: NavContro
             )
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = Color.White
         ), navigationIcon = {
             Icon(

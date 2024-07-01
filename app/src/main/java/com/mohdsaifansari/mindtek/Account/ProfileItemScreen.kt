@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -59,8 +61,8 @@ fun ProfileMainScreen(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFDCE2F1), // #dee4f4
-                        Color(0xFFFFFFFF)
+                        MaterialTheme.colorScheme.primary, // #dee4f4
+                        MaterialTheme.colorScheme.background
                     ), start = Offset(0f, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
@@ -91,7 +93,8 @@ private fun ShowPrivacyPolicyText() {
         fontWeight = FontWeight.Medium,
         fontFamily = FontFamily.Serif,
         softWrap = true,
-        textAlign = TextAlign.Justify
+        textAlign = TextAlign.Justify,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -104,7 +107,8 @@ private fun ShowContactUsText() {
         fontWeight = FontWeight.Medium,
         fontFamily = FontFamily.Serif,
         softWrap = true,
-        textAlign = TextAlign.Justify
+        textAlign = TextAlign.Justify,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -117,7 +121,8 @@ private fun ShowAboutMindtekText() {
         fontWeight = FontWeight.Medium,
         fontFamily = FontFamily.Serif,
         softWrap = true,
-        textAlign = TextAlign.Justify
+        textAlign = TextAlign.Justify,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -132,19 +137,20 @@ fun ProfileItemHeader(itemName: String?, navController: NavController) {
                     modifier = Modifier.padding(5.dp),
                     fontStyle = FontStyle.Normal,
                     fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.Serif
+                    fontFamily = FontFamily.Serif,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         },
         colors = TopAppBarColors(
-            containerColor = Color(220, 226, 241, 255),
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = Color.White
         ), navigationIcon = {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowLeft,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
@@ -156,7 +162,8 @@ fun ProfileItemHeader(itemName: String?, navController: NavController) {
                             restoreState = true
                         }
                     },
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     )
