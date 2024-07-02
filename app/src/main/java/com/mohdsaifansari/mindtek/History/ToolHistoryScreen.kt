@@ -219,7 +219,7 @@ fun ScrollableHistoryView(
                         DropdownMenu(
                             expanded = expandedDropDownMenu,
                             onDismissRequest = { expandedDropDownMenu = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                            modifier = Modifier.background(MaterialTheme.colorScheme.onSurfaceVariant)
                         ) {
                             menuList.forEach { label ->
                                 DropdownMenuItem(text = {

@@ -21,11 +21,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -71,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.lifecycleScope
@@ -149,22 +154,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val themePreference = ThemePreference(context.dataStore)
             isDarkTheme = themePreference.readThemePreferences().first()
-            delay(2000)
+            delay(1000)
             keepSplashScreenVisible = false
         }
         enableEdgeToEdge(
-            statusBarStyle = if (isDarkTheme) {
-                SystemBarStyle.light(
-                    Color(220, 226, 241, 255).toArgb(),
-                    Color(64, 82, 100, 255).toArgb()
-                )
-
-            } else {
-                SystemBarStyle.light(
-                    Color(64, 82, 100, 255).toArgb(),
-                    Color(220, 226, 241, 255).toArgb()
-                )//start
-            }
+            statusBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            )
         )
         setContent {
             val themePreference = remember { ThemePreference(context.dataStore) }
@@ -266,108 +263,113 @@ class MainActivity : ComponentActivity() {
             DrawerItem(R.drawable.setting, "Setting"),
             DrawerItem(R.drawable.logout, "Logout")
         )
-        ModalNavigationDrawer(drawerState = drawerState, gesturesEnabled = true, drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = MaterialTheme.colorScheme.background,
-                drawerContentColor = MaterialTheme.colorScheme.onBackground
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary, // #dee4f4
-                                    MaterialTheme.colorScheme.background
-                                ), start = Offset(0f, 0f),
-                                end = Offset(0f, Float.POSITIVE_INFINITY)
-                            )
-                        )
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            gesturesEnabled = true,
+            drawerContent = {
+                ModalDrawerSheet(
+                    drawerContainerColor = MaterialTheme.colorScheme.background,
+                    drawerContentColor = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.systemBarsPadding()
                 ) {
-                    LaunchedEffect(Unit) {
-                        viewModel.checkUserData(
-                            context = context,
-                            db = DatabaseProvider.userDatabase
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(50.dp))
-                    ProfilePicture(
-                        viewModel = viewModel,
-                        profileKey = ProfilePhotoKey.NavDrawerPhotoKey.name
-                    )
-
-                    profileData?.let {
-                        Text(
-                            text = it.firstName + " " + it.lastName,
-                            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontFamily = FontFamily.Serif
-                        )
-                        Text(
-                            text = it.email,
-                            modifier = Modifier.padding(start = 22.dp, top = 2.dp),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
-                HorizontalDivider()
-                drawerItemList.forEach { item ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    NavigationDrawerItem(
-                        label = {
-                            Text(
-                                text = item.title,
-                                color = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground,
-                                fontFamily = FontFamily.Serif
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary, // #dee4f4
+                                        MaterialTheme.colorScheme.background
+                                    ), start = Offset(0f, 0f),
+                                    end = Offset(0f, Float.POSITIVE_INFINITY)
+                                )
                             )
-                        },
-                        selected = false,
-                        onClick = {
-                            coroutineScope.launch {
-                                drawerState.close()
-                            }
-                            if (item.title == "Logout") {
-                                firebaseAuth.signOut()
-                                navControllerSign.navigate(LogInItem.AuthScreen.route) {
-                                    popUpTo(LogInItem.HomeScreen.route) {
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            } else if (item.title == "Setting") {
-                                navControllerSign.navigate(LogInItem.SettingNav.route) {
-                                    popUpTo(LogInItem.HomeScreen.route) {
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        }, modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = MaterialTheme.colorScheme.background,
-                            selectedContainerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = item.icon),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .background(Color.Transparent)
-                                    .size(24.dp),
-                                tint = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground
+                    ) {
+                        LaunchedEffect(Unit) {
+                            viewModel.checkUserData(
+                                context = context,
+                                db = DatabaseProvider.userDatabase
                             )
                         }
-                    )
+                        Spacer(modifier = Modifier.height(50.dp))
+                        ProfilePicture(
+                            viewModel = viewModel,
+                            profileKey = ProfilePhotoKey.NavDrawerPhotoKey.name
+                        )
+
+                        profileData?.let {
+                            Text(
+                                text = it.firstName + " " + it.lastName,
+                                modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontFamily = FontFamily.Serif
+                            )
+                            Text(
+                                text = it.email,
+                                modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                    drawerItemList.forEach { item ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        NavigationDrawerItem(
+                            label = {
+                                Text(
+                                    text = item.title,
+                                    color = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground,
+                                    fontFamily = FontFamily.Serif
+                                )
+                            },
+                            selected = false,
+                            onClick = {
+                                coroutineScope.launch {
+                                    drawerState.close()
+                                }
+                                if (item.title == "Logout") {
+                                    firebaseAuth.signOut()
+                                    navControllerSign.navigate(LogInItem.AuthScreen.route) {
+                                        popUpTo(LogInItem.HomeScreen.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                } else if (item.title == "Setting") {
+                                    navControllerSign.navigate(LogInItem.SettingNav.route) {
+                                        popUpTo(LogInItem.HomeScreen.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedContainerColor = MaterialTheme.colorScheme.background,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = item.icon),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .background(Color.Transparent)
+                                        .size(24.dp),
+                                    tint = if (item.title == "Logout") Color.Red else MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                        )
+                    }
                 }
-            }
-        }) {
+            }) {
             Scaffold(topBar = {
                 MainHeader(coroutineScope, drawerState)
             }, bottomBar = {
@@ -463,7 +465,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                 ) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.surface, modifier = Modifier.align(
+                        color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.align(
                             Alignment.Center
                         )
                     )
@@ -541,10 +543,11 @@ class MainActivity : ComponentActivity() {
                         unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
                         focusedBorderColor = MaterialTheme.colorScheme.onBackground,
                         unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                        focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                        unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
                     )
                 )
                 Spacer(modifier = Modifier.width(8.dp))

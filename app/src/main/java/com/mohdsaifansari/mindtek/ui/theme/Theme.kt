@@ -1,5 +1,7 @@
 package com.mohdsaifansari.mindtek.ui.theme
 
+import android.app.Activity
+import android.graphics.Color
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,7 +10,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = dark_Primary_Color,
@@ -16,7 +21,8 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = dark_tertiary_Color,
     background = dark_Background_Color,
     surface = dark_Surface_Color,
-    onBackground = dark_OnBackground_Color, onSurface = dark_OnSurface_Color
+    onBackground = dark_OnBackground_Color, onSurface = dark_OnSurface_Color,
+    onSurfaceVariant = dark_OnSurfaceVarient_Color, surfaceContainer = dark_SurfaceContainer_Color
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -25,7 +31,10 @@ private val LightColorScheme = lightColorScheme(
     tertiary = light_tertiary_Color,
     background = light_Background_Color,
     surface = light_Surface_Color,
-    onBackground = light_OnBackground_Color, onSurface = light_OnSurface_Color
+    onBackground = light_OnBackground_Color,
+    onSurface = light_OnSurface_Color,
+    onSurfaceVariant = light_OnSurfaceVarient_Color,
+    surfaceContainer = light_SurfaceContainer_Color
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -53,6 +62,14 @@ fun MindtekTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+    val view = LocalView.current
+    if (!view.isInEditMode){
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = Color.TRANSPARENT
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     MaterialTheme(

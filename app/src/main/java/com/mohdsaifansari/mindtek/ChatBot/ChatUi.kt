@@ -38,7 +38,7 @@ fun ModalChatBox(response: String) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.onSurface,
             contentColor = MaterialTheme.colorScheme.onBackground,
             disabledContainerColor = Color.Transparent,
             disabledContentColor = Color.Transparent

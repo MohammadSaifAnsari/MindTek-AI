@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -216,7 +217,8 @@ fun MainContentEditProfile(
                     focusedBorderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
@@ -254,7 +256,8 @@ fun MainContentEditProfile(
                     focusedBorderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
@@ -267,7 +270,11 @@ fun MainContentEditProfile(
             },
             modifier = Modifier
                 .fillMaxWidth(0.7f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(16.dp)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         ) {
             if (viewModel.iscircularloading.collectAsState().value) {
                 CircularProgressIndicator(

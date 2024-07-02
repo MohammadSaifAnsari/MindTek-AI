@@ -222,7 +222,8 @@ class SummarizerActivity : ComponentActivity() {
                             focusedBorderColor = MaterialTheme.colorScheme.onBackground,
                             unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
                             focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
-                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                            cursorColor = MaterialTheme.colorScheme.onBackground
                         )
                     )
                     if (text.isEmpty() && extractedText.value.isEmpty()) {
@@ -288,7 +289,7 @@ class SummarizerActivity : ComponentActivity() {
                         .padding(start = 20.dp, top = 4.dp, end = 20.dp, bottom = 4.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Text(

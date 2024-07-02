@@ -156,7 +156,7 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                     },
                 shape = RoundedCornerShape(8.dp),
                 colors = CardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     contentColor = MaterialTheme.colorScheme.onBackground,
                     disabledContentColor = Color.Transparent,
                     disabledContainerColor = Color.Transparent

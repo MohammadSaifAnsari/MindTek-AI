@@ -123,7 +123,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
                     focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
             Spacer(
@@ -154,7 +155,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
                     focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
             Spacer(
@@ -192,7 +194,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
                     focusedLabelColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
-                    errorTextColor = MaterialTheme.colorScheme.onBackground
+                    errorTextColor = MaterialTheme.colorScheme.onBackground,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
             Spacer(
@@ -223,7 +226,8 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
                     focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedLabelColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
             if (firstNametext.isNotEmpty() && lastNametext.isNotEmpty() && passwordtext.isNotEmpty() && emailtext.isNotEmpty() && (isErrorinEmail == false)) {
@@ -249,7 +253,7 @@ fun SignUpScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                 enabled = isEnabledButton,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
                 if (viewModel.isloadingAnimation.collectAsState().value) {

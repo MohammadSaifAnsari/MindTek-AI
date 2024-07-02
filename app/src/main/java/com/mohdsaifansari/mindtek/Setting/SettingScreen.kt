@@ -2,6 +2,7 @@ package com.mohdsaifansari.mindtek.Setting
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mohdsaifansari.mindtek.Components.LogInItem
 import com.mohdsaifansari.mindtek.R
@@ -80,9 +83,16 @@ fun SettingScreen(navController: NavController, context: Context) {
                             end = Offset(0f, Float.POSITIVE_INFINITY)
                         )
                     )
-                //start
             ) {
-
+                BackHandler {
+                    navController.navigate(LogInItem.HomeScreen.route) {
+                        popUpTo(LogInItem.SettingNav.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
                 ThemeSwitch(isDarkTheme) { newTheme ->
                     isDarkTheme = newTheme
                     coroutineScope.launch { themePreference.saveThemePreferences(newTheme) }
@@ -139,7 +149,12 @@ private fun ThemeSwitch(isDarkTheme: Boolean, onThemeChange: (Boolean) -> Unit) 
 
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-        Text(text = "Change Theme", color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = "Dark Theme",
+            color = MaterialTheme.colorScheme.onBackground,
+            fontFamily = FontFamily.Serif,
+            fontSize = 16.sp
+        )
         Spacer(modifier = Modifier.weight(1f))
         Switch(
             checked = isDarkTheme,
@@ -154,7 +169,16 @@ private fun ThemeSwitch(isDarkTheme: Boolean, onThemeChange: (Boolean) -> Unit) 
                         Icons.Default.Clear
                     }, contentDescription = null
                 )
-            }
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                checkedTrackColor = MaterialTheme.colorScheme.secondary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
+                uncheckedBorderColor = MaterialTheme.colorScheme.secondary,
+                checkedIconColor = MaterialTheme.colorScheme.onBackground,
+                uncheckedIconColor = MaterialTheme.colorScheme.onBackground
+            )
         )
     }
 }

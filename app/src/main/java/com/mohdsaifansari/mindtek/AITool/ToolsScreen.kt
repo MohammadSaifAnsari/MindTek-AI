@@ -150,7 +150,8 @@ fun Generation(title: String, subTitle: String, context: Context) {
                     focusedBorderColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
                     focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.tertiary,
+                    cursorColor = MaterialTheme.colorScheme.onBackground
                 )
             )
             if (text.isNotEmpty()) {
@@ -177,7 +178,7 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 }, enabled = isEnabledButton,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    disabledContainerColor = MaterialTheme.colorScheme.onSurface
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
                 Text(text = "Generate", color = MaterialTheme.colorScheme.onBackground)
