@@ -1,7 +1,5 @@
 package com.mohdsaifansari.mindtek.AITool
 
-import android.content.Context
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -73,14 +71,13 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
-import com.mohdsaifansari.mindtek.Data.Date
+import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
 import com.mohdsaifansari.mindtek.R
-import com.mohdsaifansari.mindtek.Setting.ThemePreference
-import com.mohdsaifansari.mindtek.Setting.dataStore
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.ThemePreference
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.dataStore
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import java.time.LocalDate
 
 class SummarizerActivity : ComponentActivity() {
 
@@ -99,7 +96,6 @@ class SummarizerActivity : ComponentActivity() {
     private val firestore = FirebaseFirestore.getInstance()
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val context = this@SummarizerActivity
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,6 +163,8 @@ class SummarizerActivity : ComponentActivity() {
         var isEnabledButton by remember {
             mutableStateOf(false)
         }
+
+        val coinViewModal = viewModel<CoinViewModal>()
         Scaffold(
             topBar = {
                 SummarizerHeader(title = title, this@SummarizerActivity)
@@ -265,22 +263,32 @@ class SummarizerActivity : ComponentActivity() {
                 }
                 Button(
                     onClick = {
-                        inputText = text
-                        text = ""
-                        extractedText.value = ""
-                        val uid = firebaseAuth.currentUser?.uid.toString()
-                        firestore.collection("History").document(uid)
-                            .update("Count", FieldValue.increment(1))
-                            .addOnSuccessListener {
-                            }.addOnFailureListener {
-                                Toast.makeText(
-                                    this@SummarizerActivity,
-                                    "Something went wrong",
-                                    Toast.LENGTH_SHORT
-                                ).show();
-                            }
-                        viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
-                        showBottomSheet = true
+                        if (coinViewModal.isCoin.value >= 10) {
+                            inputText = text
+                            text = ""
+                            extractedText.value = ""
+                            val uid = firebaseAuth.currentUser?.uid.toString()
+                            firestore.collection("History").document(uid)
+                                .update("Count", FieldValue.increment(1))
+                                .addOnSuccessListener {
+                                    coinViewModal.subtractCoin(context)
+                                    coinViewModal.getCoin()
+                                }.addOnFailureListener {
+                                    Toast.makeText(
+                                        this@SummarizerActivity,
+                                        "Something went wrong",
+                                        Toast.LENGTH_SHORT
+                                    ).show();
+                                }
+                            viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
+                            showBottomSheet = true
+                        } else {
+                            Toast.makeText(
+                                this@SummarizerActivity,
+                                "Insufficient coins",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     },
                     enabled = isEnabledButton,
                     modifier = Modifier

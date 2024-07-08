@@ -1,4 +1,4 @@
-package com.mohdsaifansari.mindtek.Setting
+package com.mohdsaifansari.mindtek.Setting.ThemeChange
 
 import android.content.Context
 import androidx.datastore.core.DataStore

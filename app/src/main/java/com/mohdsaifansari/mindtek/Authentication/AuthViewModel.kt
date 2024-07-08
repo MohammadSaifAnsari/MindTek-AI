@@ -91,6 +91,7 @@ class AuthViewModel : ViewModel() {
                         .addOnSuccessListener {
                             firestore.collection("History").document(uid.toString()).set(count)
                                 .addOnSuccessListener {
+                                    setCoin(context, uid.toString())
                                     Toast.makeText(
                                         context,
                                         "Sign Up Successful",
@@ -122,6 +123,20 @@ class AuthViewModel : ViewModel() {
                     _isloadingAnimation.value = false
                     Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
                 }
+            }
+        }
+    }
+
+    private fun setCoin(context: Context, uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val total_coins = hashMapOf(
+                "Total Coins" to 50
+            )
+            firestore.collection("Coins").document(uid).set(total_coins).addOnSuccessListener {
+                Toast.makeText(context, "Won 50 bonus Coins", Toast.LENGTH_SHORT).show();
+            }.addOnFailureListener {
+                Toast.makeText(context, "Something went wrong in getting coins", Toast.LENGTH_SHORT)
+                    .show();
             }
         }
     }

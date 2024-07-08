@@ -109,6 +109,8 @@ dependencies {
     //DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    //google ads
+    implementation (libs.play.services.ads)
 
 
     testImplementation(libs.junit)

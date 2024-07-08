@@ -74,6 +74,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
+import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
 import com.mohdsaifansari.mindtek.Components.LoadingAnimation
 import com.mohdsaifansari.mindtek.MainActivity
 
@@ -101,6 +102,8 @@ fun Generation(title: String, subTitle: String, context: Context) {
     var isEnabledButton by remember {
         mutableStateOf(false)
     }
+
+    val coinViewModal = viewModel<CoinViewModal>()
     Scaffold(
         topBar = {
             ToolsHeader(title, context)
@@ -162,19 +165,25 @@ fun Generation(title: String, subTitle: String, context: Context) {
                     .align(Alignment.End)
                     .padding(end = 20.dp, top = 20.dp),
                 onClick = {
-                    inputText = text
-                    text = ""
-                    showDialog = true
-                    val uid = firebaseAuth.currentUser?.uid.toString()
-                    firestore.collection("History").document(uid)
-                        .update("Count", FieldValue.increment(1))
-                        .addOnSuccessListener {
-                        }.addOnFailureListener {
-                            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT)
-                                .show();
-                        }
-                    viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
-                    showBottomSheet = true
+                    if (coinViewModal.isCoin.value >= 10) {
+                        inputText = text
+                        text = ""
+                        showDialog = true
+                        val uid = firebaseAuth.currentUser?.uid.toString()
+                        firestore.collection("History").document(uid)
+                            .update("Count", FieldValue.increment(1))
+                            .addOnSuccessListener {
+                                coinViewModal.subtractCoin(context)
+                                coinViewModal.getCoin()
+                            }.addOnFailureListener {
+                                Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT)
+                                    .show();
+                            }
+                        viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
+                        showBottomSheet = true
+                    } else {
+                        Toast.makeText(context, "Insufficient coins", Toast.LENGTH_SHORT).show()
+                    }
                 }, enabled = isEnabledButton,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surface,

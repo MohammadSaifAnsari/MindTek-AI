@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -21,21 +20,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -73,11 +73,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -90,6 +88,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
+import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -100,6 +99,8 @@ import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
 import com.mohdsaifansari.mindtek.Account.ProfilePicture
 import com.mohdsaifansari.mindtek.Account.ProfileScreen
 import com.mohdsaifansari.mindtek.Account.ProfileViewModel
+import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
+import com.mohdsaifansari.mindtek.AdsMob.rewardedAds
 import com.mohdsaifansari.mindtek.Authentication.SignInScreen
 import com.mohdsaifansari.mindtek.Authentication.SignUpScreen
 import com.mohdsaifansari.mindtek.ChatBot.ChatUiState
@@ -118,8 +119,8 @@ import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvid
 import com.mohdsaifansari.mindtek.History.ResultScreen
 import com.mohdsaifansari.mindtek.History.ToolHistory
 import com.mohdsaifansari.mindtek.Setting.SettingScreen
-import com.mohdsaifansari.mindtek.Setting.ThemePreference
-import com.mohdsaifansari.mindtek.Setting.dataStore
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.ThemePreference
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.dataStore
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -171,6 +172,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             MindtekTheme(darkTheme = isDarkTheme) {
+                MobileAds.initialize(this)
                 DatabaseProvider.initialize(this@MainActivity)
                 ChatDatabaseProvider.initialize(this@MainActivity)
                 ToolHistoryDatabaseProvider.initialize(this@MainActivity)
@@ -263,6 +265,19 @@ class MainActivity : ComponentActivity() {
             DrawerItem(R.drawable.setting, "Setting"),
             DrawerItem(R.drawable.logout, "Logout")
         )
+
+        var isDialog by remember {
+            mutableStateOf(false)
+        }
+
+        var coin by remember {
+            mutableStateOf("0")
+        }
+
+        var circularLoading by remember {
+            mutableStateOf(false)
+        }
+
         ModalNavigationDrawer(
             drawerState = drawerState,
             gesturesEnabled = true,
@@ -370,8 +385,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }) {
+            val coinViewModal = viewModel<CoinViewModal>()
+            coin = coinViewModal.isCoin.collectAsState().value.toString()
             Scaffold(topBar = {
-                MainHeader(coroutineScope, drawerState)
+                MainHeader(coroutineScope, drawerState, coin) { onClicked ->
+                    isDialog = onClicked
+                }
             }, bottomBar = {
                 MainBottomNavigation(navController = navController)
             }) { innerPadding ->
@@ -382,6 +401,63 @@ class MainActivity : ComponentActivity() {
                     navControllerSign,
                     viewModel
                 )
+                if (isDialog) {
+                    Dialog(onDismissRequest = {
+                        isDialog = false
+                    }) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                            modifier = Modifier.size(200.dp, 200.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(text = "Watch Video")
+                                Icon(
+                                    painter = painterResource(id = R.drawable.watchvideo),
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .size(50.dp)
+                                        .background(Color.Transparent),
+                                    contentDescription = null, tint = Color.Unspecified
+                                )
+                                Button(
+                                    onClick = {
+                                        circularLoading = true
+                                        rewardedAds(
+                                            this@MainActivity,
+                                            coinViewModal,
+                                            closeDialogbox = {
+                                                isDialog = it
+                                            },
+                                            closeCircularloading = {
+                                                circularLoading = it
+                                            })
+                                    }, colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    if (circularLoading) {
+                                        CircularProgressIndicator(
+                                            color = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Earn 10 Coins",
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
             }
         }
 

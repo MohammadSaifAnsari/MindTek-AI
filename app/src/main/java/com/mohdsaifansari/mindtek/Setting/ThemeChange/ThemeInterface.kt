@@ -1,7 +1,6 @@
-package com.mohdsaifansari.mindtek.Setting
+package com.mohdsaifansari.mindtek.Setting.ThemeChange
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 
 val THEME_KEY = booleanPreferencesKey("theme_change_key")
