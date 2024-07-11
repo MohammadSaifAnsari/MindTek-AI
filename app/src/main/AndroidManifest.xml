@@ -17,11 +17,6 @@
         android:theme="@style/Theme.Mindtek"
         tools:targetApi="31">
         <activity
-            android:name=".AITool.SummarizerActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Mindtek" />
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

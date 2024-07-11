@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,7 +34,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 
 @Composable
 fun ProfileItemScreen(navController: NavController, context: Context) {
@@ -154,8 +153,8 @@ fun ProfileItemHeader(itemName: String?, navController: NavController) {
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
-                        navController.navigate(LogInItem.HomeScreen.route) {
-                            popUpTo(LogInItem.ProfileItemNav.route) {
+                        navController.navigate(NavigationItem.HomeScreen.route) {
+                            popUpTo(NavigationItem.ProfileItemNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

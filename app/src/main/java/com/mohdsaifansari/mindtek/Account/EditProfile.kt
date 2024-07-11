@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -34,7 +33,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -63,7 +61,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.Database.UserDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -321,8 +319,8 @@ fun EditProfileHeader(navController: NavController) {
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
-                        navController.navigate(LogInItem.HomeScreen.route) {
-                            popUpTo(LogInItem.ProfileEditNav.route) {
+                        navController.navigate(NavigationItem.HomeScreen.route) {
+                            popUpTo(NavigationItem.ProfileEditNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

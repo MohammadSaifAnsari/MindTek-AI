@@ -1,13 +1,12 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,15 +25,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,7 +41,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -62,27 +57,40 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mohdsaifansari.mindtek.R
 import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
 import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
+import com.mohdsaifansari.mindtek.Components.HeaderComponent
 import com.mohdsaifansari.mindtek.Components.LoadingAnimation
-import com.mohdsaifansari.mindtek.MainActivity
+import com.mohdsaifansari.mindtek.Components.NavigationItem
+import com.mohdsaifansari.mindtek.R
 
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun MainToolScreen(navController: NavController, context: Context) {
+    val titleFromNav = navController.currentBackStackEntry?.arguments?.getString("title")
+    val subtitleFromNav = navController.currentBackStackEntry?.arguments?.getString("subtitle")
+    Generation(
+        title = titleFromNav.toString(),
+        subTitle = subtitleFromNav.toString(),
+        context = context,
+        navController = navController
+    )
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Generation(title: String, subTitle: String, context: Context) {
+fun Generation(title: String, subTitle: String, context: Context, navController: NavController) {
     val firestore = FirebaseFirestore.getInstance()
     val firebaseAuth = FirebaseAuth.getInstance()
     var inputText = ""
@@ -106,7 +114,15 @@ fun Generation(title: String, subTitle: String, context: Context) {
     val coinViewModal = viewModel<CoinViewModal>()
     Scaffold(
         topBar = {
-            ToolsHeader(title, context)
+            HeaderComponent(title = title, navigationIconClickable = {
+                navController.navigate(NavigationItem.HomeScreen.route) {
+                    popUpTo(NavigationItem.ToolNav.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            })
         }
     ) { innerPadding ->
         Column(
@@ -123,6 +139,15 @@ fun Generation(title: String, subTitle: String, context: Context) {
                 )
                 .fillMaxSize()
         ) {
+            BackHandler {
+                navController.navigate(NavigationItem.HomeScreen.route) {
+                    popUpTo(NavigationItem.ToolNav.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
             Text(
                 text = subTitle,
                 modifier = Modifier
@@ -323,40 +348,4 @@ fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ToolsHeader(title: String, context: Context) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title, modifier = Modifier.padding(5.dp),
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Serif,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        },
-        colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-            scrolledContainerColor = Color.White
-        ), navigationIcon = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clickable {
-                        val intent = Intent(context, MainActivity::class.java)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        context.startActivity(intent)
-                    },
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
-    )
-}
 

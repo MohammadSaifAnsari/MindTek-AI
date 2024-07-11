@@ -1,7 +1,6 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,13 +30,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
+import androidx.navigation.NavController
 import com.mohdsaifansari.mindtek.AITool.Data.ToolData
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 
 
 @Composable
-fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
+fun MainAiToolScreen(
+    paddingValues: PaddingValues,
+    context: Context,
+    navControllerSign: NavController
+) {
 
 
     val itemSummarizer = listOf(
@@ -100,14 +104,14 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
-            ScrollableCardView(itemSummarizer, context)
+            ScrollableCardView(itemSummarizer, context, navControllerSign)
             Text(
                 text = "Content Writing Tools",
                 modifier = Modifier.padding(8.dp),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold
             )
-            ScrollableCardView(itemContent, context)
+            ScrollableCardView(itemContent, context, navControllerSign)
             Text(
                 text = "Writer",
                 modifier = Modifier.padding(8.dp),
@@ -115,7 +119,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
-            ScrollableCardView(itemWriter, context)
+            ScrollableCardView(itemWriter, context, navControllerSign)
             Text(
                 text = "Grammar",
                 modifier = Modifier.padding(8.dp),
@@ -123,7 +127,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
-            ScrollableCardView(itemGrammar, context)
+            ScrollableCardView(itemGrammar, context, navControllerSign)
             Text(
                 text = "Job Essentials",
                 modifier = Modifier.padding(8.dp),
@@ -131,7 +135,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold
             )
-            ScrollableCardView(itemJob, context)
+            ScrollableCardView(itemJob, context, navControllerSign)
         }
     }
 
@@ -140,7 +144,7 @@ fun MainAiToolScreen(paddingValues: PaddingValues, context: Context) {
 
 
 @Composable
-fun ScrollableCardView(items: List<String>, context: Context) {
+fun ScrollableCardView(items: List<String>, context: Context, navControllerSign: NavController) {
     LazyRow {
         items(
             items
@@ -152,7 +156,7 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                     .size(190.dp, 130.dp)
                     .clickable {
                         val title = ToolData(item).title
-                        MySwitchCase(title = title, context = context)
+                        checkTitle(title = title, navControllerSign)
                     },
                 shape = RoundedCornerShape(8.dp),
                 colors = CardColors(
@@ -171,7 +175,7 @@ fun ScrollableCardView(items: List<String>, context: Context) {
                     fontFamily = FontFamily.Serif
                 )
                 Image(
-                    painter = painterResource(id = ToolIcon(item)), contentDescription = null,
+                    painter = painterResource(id = toolIcon(item)), contentDescription = null,
                     modifier = Modifier
                         .size(80.dp)
                         .align(Alignment.End)
@@ -182,144 +186,144 @@ fun ScrollableCardView(items: List<String>, context: Context) {
     }
 }
 
-fun MySwitchCase(title: String?, context: Context) {
+fun checkTitle(title: String?, navControllerSign: NavController) {
 
     if (title == ToolItem.MailGeneration.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.MailGeneration.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.MailGeneration.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.MailGeneration.title,
+            ToolItem.MailGeneration.subTitle
+        )
     } else if (title == ToolItem.BlogGeneration.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.BlogGeneration.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.BlogGeneration.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.BlogGeneration.title,
+            ToolItem.BlogGeneration.subTitle
+        )
     } else if (title == ToolItem.BlogSection.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.BlogSection.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.BlogSection.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.BlogSection.title,
+            ToolItem.BlogSection.subTitle
+        )
     } else if (title == ToolItem.BlogIdeas.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.BlogIdeas.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.BlogIdeas.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.BlogIdeas.title,
+            ToolItem.BlogIdeas.subTitle
+        )
     } else if (title == ToolItem.ParagraphGenerator.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.ParagraphGenerator.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.ParagraphGenerator.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.ParagraphGenerator.title,
+            ToolItem.ParagraphGenerator.subTitle
+        )
     } else if (title == ToolItem.GenerateArticle.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.GenerateArticle.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.GenerateArticle.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.GenerateArticle.title,
+            ToolItem.GenerateArticle.subTitle
+        )
     } else if (title == ToolItem.CreativeStory.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.CreativeStory.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.CreativeStory.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.CreativeStory.title,
+            ToolItem.CreativeStory.subTitle
+        )
     } else if (title == ToolItem.CreativeLetter.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.CreativeLetter.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.CreativeLetter.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.CreativeLetter.title,
+            ToolItem.CreativeLetter.subTitle
+        )
     } else if (title == ToolItem.LoveLetter.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.LoveLetter.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.LoveLetter.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.LoveLetter.title,
+            ToolItem.LoveLetter.subTitle
+        )
     } else if (title == ToolItem.Poems.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.Poems.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.Poems.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.Poems.title,
+            ToolItem.Poems.subTitle
+        )
     } else if (title == ToolItem.SongLyrics.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.SongLyrics.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.SongLyrics.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.SongLyrics.title,
+            ToolItem.SongLyrics.subTitle
+        )
     } else if (title == ToolItem.FoodRecipe.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.FoodRecipe.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.FoodRecipe.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.FoodRecipe.title,
+            ToolItem.FoodRecipe.subTitle
+        )
     } else if (title == ToolItem.GrammerCorrection.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.GrammerCorrection.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.GrammerCorrection.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.GrammerCorrection.title,
+            ToolItem.GrammerCorrection.subTitle
+        )
     } else if (title == ToolItem.AnswerQuestion.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.AnswerQuestion.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.AnswerQuestion.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.AnswerQuestion.title,
+            ToolItem.AnswerQuestion.subTitle
+        )
     } else if (title == ToolItem.ActivePassive.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.ActivePassive.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.ActivePassive.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.ActivePassive.title,
+            ToolItem.ActivePassive.subTitle
+        )
     } else if (title == ToolItem.PassiveActive.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.PassiveActive.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.PassiveActive.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.PassiveActive.title,
+            ToolItem.PassiveActive.subTitle
+        )
     } else if (title == ToolItem.JobDescription.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.JobDescription.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.JobDescription.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.JobDescription.title,
+            ToolItem.JobDescription.subTitle
+        )
     } else if (title == ToolItem.Resume.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.Resume.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.Resume.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.Resume.title,
+            ToolItem.Resume.subTitle
+        )
     } else if (title == ToolItem.InterviewQuestions.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.InterviewQuestions.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.InterviewQuestions.subTitle)
-        context.startActivity(intent)
+        navtoToolScreen(
+            navControllerSign,
+            ToolItem.InterviewQuestions.title,
+            ToolItem.InterviewQuestions.subTitle
+        )
     } else if (title == ToolItem.TextSummarizer.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.TextSummarizer.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.TextSummarizer.subTitle)
-        context.startActivity(intent)
+        navtoSummarizerScreen(
+            navControllerSign,
+            ToolItem.TextSummarizer.title,
+            ToolItem.TextSummarizer.subTitle
+        )
     } else if (title == ToolItem.StorySummarizer.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.StorySummarizer.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.StorySummarizer.subTitle)
-        context.startActivity(intent)
+        navtoSummarizerScreen(
+            navControllerSign,
+            ToolItem.StorySummarizer.title,
+            ToolItem.StorySummarizer.subTitle
+        )
     } else if (title == ToolItem.ParagraphSummarizer.title) {
-        val intent = Intent(context, SummarizerActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("TOOL_TITLE", ToolItem.ParagraphSummarizer.title)
-        intent.putExtra("TOOL_SUBTITLE", ToolItem.ParagraphSummarizer.subTitle)
-        context.startActivity(intent)
+        navtoSummarizerScreen(
+            navControllerSign,
+            ToolItem.ParagraphSummarizer.title,
+            ToolItem.ParagraphSummarizer.subTitle
+        )
     }
 }
 
-fun ToolIcon(title: String): Int {
+fun toolIcon(title: String): Int {
     if (title == ToolItem.MailGeneration.title) {
         return ToolItem.MailGeneration.image
     } else if (title == ToolItem.BlogGeneration.title) {
@@ -364,6 +368,26 @@ fun ToolIcon(title: String): Int {
         return ToolItem.StorySummarizer.image
     } else {
         return ToolItem.ParagraphSummarizer.image
+    }
+}
+
+fun navtoToolScreen(navControllerSign: NavController, title: String, subtitle: String) {
+    navControllerSign.navigate("Tool_nav/${title}/${subtitle}") {
+        popUpTo(NavigationItem.ToolNav.route) {
+            inclusive = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+fun navtoSummarizerScreen(navControllerSign: NavController, title: String, subtitle: String) {
+    navControllerSign.navigate("Summarizer_nav/${title}/${subtitle}") {
+        popUpTo(NavigationItem.ToolNav.route) {
+            inclusive = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 

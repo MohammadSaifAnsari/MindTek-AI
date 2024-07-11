@@ -34,7 +34,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -47,7 +46,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mohdsaifansari.mindtek.Database.DatabaseProvider
 import com.mohdsaifansari.mindtek.R
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -161,16 +160,16 @@ fun ProfileItemRow(
                         viewModel.viewModelScope.launch(Dispatchers.IO) {
                             viewModel.logoutClearDatabase(db = DatabaseProvider.userDatabase)
                         }
-                        navController.navigate(LogInItem.AuthScreen.route) {
-                            popUpTo(LogInItem.HomeScreen.route) {
+                        navController.navigate(NavigationItem.AuthScreen.route) {
+                            popUpTo(NavigationItem.HomeScreen.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true
                             restoreState = true
                         }
                     } else if (item == "Personal info") {
-                        navController.navigate(LogInItem.ProfileEditNav.route) {
-                            popUpTo(LogInItem.ProfileEditNav.route) {
+                        navController.navigate(NavigationItem.ProfileEditNav.route) {
+                            popUpTo(NavigationItem.ProfileEditNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true
@@ -178,7 +177,7 @@ fun ProfileItemRow(
                         }
                     } else {
                         navController.navigate("Profile_Item_nav/${item}") {
-                            popUpTo(LogInItem.ProfileItemNav.route) {
+                            popUpTo(NavigationItem.ProfileItemNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

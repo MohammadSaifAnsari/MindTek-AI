@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Setting.ThemeChange.ThemePreference
 import com.mohdsaifansari.mindtek.Setting.ThemeChange.dataStore
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
@@ -79,8 +79,8 @@ fun SettingScreen(navController: NavController, context: Context) {
                     )
             ) {
                 BackHandler {
-                    navController.navigate(LogInItem.HomeScreen.route) {
-                        popUpTo(LogInItem.SettingNav.route) {
+                    navController.navigate(NavigationItem.HomeScreen.route) {
+                        popUpTo(NavigationItem.SettingNav.route) {
                             inclusive = true
                         }
                         launchSingleTop = true
@@ -123,8 +123,8 @@ fun SettingHeader(navController: NavController) {
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
-                        navController.navigate(LogInItem.HomeScreen.route) {
-                            popUpTo(LogInItem.SettingNav.route) {
+                        navController.navigate(NavigationItem.HomeScreen.route) {
+                            popUpTo(NavigationItem.SettingNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

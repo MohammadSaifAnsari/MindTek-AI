@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.R
 
@@ -127,8 +127,8 @@ fun ResultHeader(resultText: String?, context: Context, navController: NavContro
                 modifier = Modifier
                     .padding(5.dp)
                     .clickable {
-                        navController.navigate(LogInItem.HomeScreen.route) {
-                            popUpTo(LogInItem.ResultNav.route) {
+                        navController.navigate(NavigationItem.HomeScreen.route) {
+                            popUpTo(NavigationItem.ResultNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

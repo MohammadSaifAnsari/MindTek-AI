@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.R
 
 @Composable
@@ -254,8 +254,8 @@ fun SignInScreen(auth: FirebaseAuth, context: Context, navController: NavControl
                         append("Sign up here")
                     }
                 }.toString()), onClick = {
-                    navController.navigate(LogInItem.SignUp.route) {
-                        popUpTo(LogInItem.AuthScreen.route) {
+                    navController.navigate(NavigationItem.SignUp.route) {
+                        popUpTo(NavigationItem.AuthScreen.route) {
                             inclusive = true
                         }
                         launchSingleTop = true

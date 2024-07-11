@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,8 +38,8 @@ class AuthViewModel : ViewModel() {
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show();
-                    navController.navigate(LogInItem.HomeScreen.route) {
-                        popUpTo(LogInItem.AuthScreen.route) {
+                    navController.navigate(NavigationItem.HomeScreen.route) {
+                        popUpTo(NavigationItem.AuthScreen.route) {
                             inclusive = true
                         }
                         launchSingleTop = true
@@ -98,8 +98,8 @@ class AuthViewModel : ViewModel() {
                                         Toast.LENGTH_SHORT
                                     )
                                         .show();
-                                    navController.navigate(LogInItem.HomeScreen.route) {
-                                        popUpTo(LogInItem.AuthScreen.route) {
+                                    navController.navigate(NavigationItem.HomeScreen.route) {
+                                        popUpTo(NavigationItem.AuthScreen.route) {
                                             inclusive = true
                                         }
                                         launchSingleTop = true

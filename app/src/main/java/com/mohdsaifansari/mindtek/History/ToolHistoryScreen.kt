@@ -48,10 +48,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Data.LoadHistory
 import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.R
@@ -155,7 +154,7 @@ fun ScrollableHistoryView(
                     .fillMaxWidth()
                     .clickable {
                         navController.navigate("Result_nav/${item.idNo}") {
-                            popUpTo(LogInItem.ResultNav.route) {
+                            popUpTo(NavigationItem.ResultNav.route) {
                                 inclusive = true
                             }
                             launchSingleTop = true

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -11,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -93,6 +95,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.mohdsaifansari.mindtek.AITool.MainAiToolScreen
+import com.mohdsaifansari.mindtek.AITool.MainSummarizerScreen
+import com.mohdsaifansari.mindtek.AITool.MainToolScreen
 import com.mohdsaifansari.mindtek.Account.EditProfile
 import com.mohdsaifansari.mindtek.Account.ProfileItemScreen
 import com.mohdsaifansari.mindtek.Account.ProfilePhotoKey
@@ -110,7 +114,7 @@ import com.mohdsaifansari.mindtek.ChatBot.ModalChatBox
 import com.mohdsaifansari.mindtek.ChatBot.UserUriChatBox
 import com.mohdsaifansari.mindtek.Components.BottomNavItem
 import com.mohdsaifansari.mindtek.Components.LoadingAnimation
-import com.mohdsaifansari.mindtek.Components.LogInItem
+import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Components.MainBottomNavigation
 import com.mohdsaifansari.mindtek.Data.DrawerItem
 import com.mohdsaifansari.mindtek.Database.ChatDatabaseProvider
@@ -141,11 +145,25 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
+    private val pdfUri = MutableStateFlow("")
+
+    private val launcher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            pdfUri.update {
+                uri.toString()
+            }
+        }
+
+    }
     val context = this@MainActivity
     private val auth: FirebaseAuth by lazy { Firebase.auth }
     private val firebaseAuth = FirebaseAuth.getInstance()
     var isDarkTheme by mutableStateOf(false)
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
@@ -181,35 +199,35 @@ class MainActivity : ComponentActivity() {
                 NavHost(
                     navController = navControllerSign,
                     startDestination = if (firebaseAuth.currentUser != null) {
-                        LogInItem.HomeScreen.route
+                        NavigationItem.HomeScreen.route
                     } else {
-                        LogInItem.AuthScreen.route
+                        NavigationItem.AuthScreen.route
                     }
                 ) {
                     navigation(
-                        startDestination = LogInItem.SignIn.route,
-                        route = LogInItem.AuthScreen.route
+                        startDestination = NavigationItem.SignIn.route,
+                        route = NavigationItem.AuthScreen.route
                     ) {
-                        composable(LogInItem.SignIn.route) {
+                        composable(NavigationItem.SignIn.route) {
                             SignInScreen(auth = auth, context = context, navControllerSign)
                         }
-                        composable(LogInItem.SignUp.route) {
+                        composable(NavigationItem.SignUp.route) {
                             SignUpScreen(auth = auth, context = context, navControllerSign)
                         }
                     }
                     navigation(
-                        startDestination = LogInItem.MainScreen.route,
-                        route = LogInItem.HomeScreen.route
+                        startDestination = NavigationItem.MainScreen.route,
+                        route = NavigationItem.HomeScreen.route
                     ) {
-                        composable(LogInItem.MainScreen.route) {
+                        composable(NavigationItem.MainScreen.route) {
                             MainEntryPoint(context, navControllerSign)
                         }
                     }
                     navigation(
-                        startDestination = LogInItem.ProfileEditScreen.route,
-                        route = LogInItem.ProfileEditNav.route
+                        startDestination = NavigationItem.ProfileEditScreen.route,
+                        route = NavigationItem.ProfileEditNav.route
                     ) {
-                        composable(LogInItem.ProfileEditScreen.route) {
+                        composable(NavigationItem.ProfileEditScreen.route) {
                             EditProfile(
                                 context,
                                 imagePicker,
@@ -221,27 +239,49 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     navigation(
-                        startDestination = LogInItem.ResultScreen.route,
-                        route = LogInItem.ResultNav.route
+                        startDestination = NavigationItem.ResultScreen.route,
+                        route = NavigationItem.ResultNav.route
                     ) {
-                        composable(LogInItem.ResultScreen.route) {
+                        composable(NavigationItem.ResultScreen.route) {
                             ResultScreen(navControllerSign, context)
                         }
                     }
                     navigation(
-                        startDestination = LogInItem.ProfileItemScreen.route,
-                        route = LogInItem.ProfileItemNav.route
+                        startDestination = NavigationItem.ProfileItemScreen.route,
+                        route = NavigationItem.ProfileItemNav.route
                     ) {
-                        composable(LogInItem.ProfileItemScreen.route) {
+                        composable(NavigationItem.ProfileItemScreen.route) {
                             ProfileItemScreen(navController = navControllerSign, context = context)
                         }
                     }
                     navigation(
-                        startDestination = LogInItem.SettingScreen.route,
-                        route = LogInItem.SettingNav.route
+                        startDestination = NavigationItem.SettingScreen.route,
+                        route = NavigationItem.SettingNav.route
                     ) {
-                        composable(LogInItem.SettingScreen.route) {
+                        composable(NavigationItem.SettingScreen.route) {
                             SettingScreen(navController = navControllerSign, context = context)
+                        }
+                    }
+                    navigation(
+                        startDestination = NavigationItem.SummarizerScreen.route,
+                        route = NavigationItem.SummarizerNav.route
+                    ) {
+                        composable(NavigationItem.SummarizerScreen.route) {
+                            MainSummarizerScreen(navController = navControllerSign,
+                                context,
+                                pdfUri,
+                                launcher,
+                                clearPdfUri = { clearpdfUri ->
+                                    pdfUri.update { clearpdfUri }
+                                })
+                        }
+                    }
+                    navigation(
+                        startDestination = NavigationItem.ToolScreen.route,
+                        route = NavigationItem.ToolNav.route
+                    ) {
+                        composable(NavigationItem.ToolScreen.route) {
+                            MainToolScreen(navController = navControllerSign, context = context)
                         }
                     }
 
@@ -349,16 +389,16 @@ class MainActivity : ComponentActivity() {
                                 }
                                 if (item.title == "Logout") {
                                     firebaseAuth.signOut()
-                                    navControllerSign.navigate(LogInItem.AuthScreen.route) {
-                                        popUpTo(LogInItem.HomeScreen.route) {
+                                    navControllerSign.navigate(NavigationItem.AuthScreen.route) {
+                                        popUpTo(NavigationItem.HomeScreen.route) {
                                             inclusive = true
                                         }
                                         launchSingleTop = true
                                         restoreState = true
                                     }
                                 } else if (item.title == "Setting") {
-                                    navControllerSign.navigate(LogInItem.SettingNav.route) {
-                                        popUpTo(LogInItem.HomeScreen.route) {
+                                    navControllerSign.navigate(NavigationItem.SettingNav.route) {
+                                        popUpTo(NavigationItem.HomeScreen.route) {
                                             inclusive = true
                                         }
                                         launchSingleTop = true
@@ -394,7 +434,7 @@ class MainActivity : ComponentActivity() {
             }, bottomBar = {
                 MainBottomNavigation(navController = navController)
             }) { innerPadding ->
-                MainNavigation(
+                MainBottomNavigation(
                     navHostController = navController,
                     innerPadding,
                     context,
@@ -464,7 +504,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun MainNavigation(
+    fun MainBottomNavigation(
         navHostController: NavHostController,
         padding: PaddingValues,
         context: Context,
@@ -474,7 +514,7 @@ class MainActivity : ComponentActivity() {
         NavHost(navController = navHostController, startDestination = BottomNavItem.AItools.route)
         {
             composable(BottomNavItem.AItools.route) {
-                MainAiToolScreen(padding, context)
+                MainAiToolScreen(padding, context, navControllerSign)
             }
             composable(BottomNavItem.ChatBot.route) {
                 ChatScreen(paddingValues = padding)
