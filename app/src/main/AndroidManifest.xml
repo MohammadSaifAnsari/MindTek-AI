@@ -29,11 +29,8 @@
         </activity>
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8292164393279864~4995160740"/>
+            android:value="ca-app-pub-8292164393279864~4995160740" />
 
-        <meta-data
-            android:name="pspdfkit_license_key"
-            android:value="xtkHvcCFxy90I4WKmv3S-n7cm4pEGnzk9HtRC6gSiOkfINPlyG4XUQD9WYpxxCKK5FwUNHYRJ97qcd7Rl6rOD3rKZhIsQlXSh3gYqM90VME7p-BezO-1G6Berw8aCi7zpLRRdWlZ8khIvDc10gdlDfBLr26jXloXzPw3xjTTNxQDBftO8g6NmOGS4ZuqSNU_prDXxLCUvHBloxuM" />
     </application>
 
 </manifest>

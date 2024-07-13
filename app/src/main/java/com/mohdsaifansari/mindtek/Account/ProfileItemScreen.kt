@@ -34,13 +34,22 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.mohdsaifansari.mindtek.Components.HeaderComponent
 import com.mohdsaifansari.mindtek.Components.NavigationItem
 
 @Composable
 fun ProfileItemScreen(navController: NavController, context: Context) {
     val itemName = navController.currentBackStackEntry?.arguments?.getString("item_name")
     Scaffold(topBar = {
-        ProfileItemHeader(itemName, navController)
+        HeaderComponent(title = itemName.toString(), navigationIconClickable =  {
+            navController.navigate(NavigationItem.HomeScreen.route) {
+                popUpTo(NavigationItem.ProfileItemNav.route) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        })
     }) { innerPadding ->
         ProfileMainScreen(itemName, paddingValues = innerPadding)
     }
@@ -125,48 +134,6 @@ private fun ShowAboutMindtekText() {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileItemHeader(itemName: String?, navController: NavController) {
-    CenterAlignedTopAppBar(
-        title = {
-            if (itemName != null) {
-                Text(
-                    text = itemName,
-                    modifier = Modifier.padding(5.dp),
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.Serif,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        },
-        colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-            scrolledContainerColor = Color.White
-        ), navigationIcon = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clickable {
-                        navController.navigate(NavigationItem.HomeScreen.route) {
-                            popUpTo(NavigationItem.ProfileItemNav.route) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
-    )
-}
 
 
 fun buildPrivacyPolicyAnnotatedString(): AnnotatedString {

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +26,9 @@ fun HeaderComponent(title: String, navigationIconClickable:() -> Unit) {
             Text(
                 text = title, modifier = Modifier.padding(5.dp),
                 fontStyle = FontStyle.Normal,
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         colors = TopAppBarColors(
@@ -42,7 +45,8 @@ fun HeaderComponent(title: String, navigationIconClickable:() -> Unit) {
                     .clickable {
                         navigationIconClickable()
                     },
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     )

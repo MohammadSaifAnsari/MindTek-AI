@@ -1,9 +1,7 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
-import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
@@ -43,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,9 +69,8 @@ import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
 import com.mohdsaifansari.mindtek.Components.HeaderComponent
 import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.R
-import com.pspdfkit.document.PdfDocument
-import com.pspdfkit.document.PdfDocumentLoader.openDocument
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -119,9 +115,6 @@ fun SummarizerScreen(
     var outputMessage = ""
     val viewmodel: AIToolViewModal = viewModel()
     var text by remember {
-        mutableStateOf("")
-    }
-    val extractedText = remember {
         mutableStateOf("")
     }
     var uri = pdfUri.collectAsState().value
@@ -214,19 +207,15 @@ fun SummarizerScreen(
                         cursorColor = MaterialTheme.colorScheme.onBackground
                     )
                 )
-                if (text.isEmpty() && extractedText.value.isEmpty()) {
+                if (text.isEmpty()) {
                     path = uri
 
                     if (path.isNotEmpty()) {
-                        Log.d("saif123", path)
-                        extractData(extractedText, path, context)
+                        runBlocking {
+                            viewmodel.splitPdfIntoImages(getText = { text = it }, path, context)
+                        }
                         uri = ""
                         path = ""
-                        //start
-                    }
-                    if (extractedText.value.isNotEmpty()) {
-                        text = extractedText.value.trim()
-                        extractedText.value = ""
                     }
                     FloatingActionButton(
                         onClick = {
@@ -257,7 +246,6 @@ fun SummarizerScreen(
                     if (coinViewModal.isCoin.value >= 10) {
                         inputText = text
                         text = ""
-                        extractedText.value = ""
                         clearUri("")
                         val uid = firebaseAuth.currentUser?.uid.toString()
                         firestore.collection("History").document(uid)
@@ -403,25 +391,3 @@ fun SummarizerScreen(
 }
 
 
-// on below line we are creating an extract data method to extract our data.
-fun extractData(extractedString: MutableState<String>, path: String, context: Context) {
-    try {
-        // on below line we are creating a variable for storing our extracted text
-        var extractedText = ""
-
-        val document: PdfDocument = openDocument(context, Uri.parse(path))
-        val count = document.pageCount
-
-        for (i in 0 until count) {
-            var eText = document.getPageText(i).trim()
-            extractedText = extractedText + "\n" + eText
-        }
-
-        // on below line we are setting extracted text to our text view.
-        extractedString.value = extractedText
-    }
-    // on below line we are handling our exception using catch block
-    catch (e: Exception) {
-        e.printStackTrace()
-    }
-}

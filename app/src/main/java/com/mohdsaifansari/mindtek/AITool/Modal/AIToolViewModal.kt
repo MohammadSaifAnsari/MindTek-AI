@@ -1,7 +1,12 @@
 package com.mohdsaifansari.mindtek.AITool.Modal
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
+import android.net.Uri
 import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
@@ -10,13 +15,19 @@ import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.mohdsaifansari.mindtek.AITool.Data.ToolItem
 import com.mohdsaifansari.mindtek.Apikey
 import com.mohdsaifansari.mindtek.Data.Date
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 
 class AIToolViewModal : ViewModel() {
@@ -49,6 +60,34 @@ class AIToolViewModal : ViewModel() {
 
     }
 
+    suspend fun splitPdfIntoImages(getText:(String) -> Unit, path: String, context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+            var extractText = ""
+            try {
+                val parcelFileDescriptor: ParcelFileDescriptor? =
+                    context.contentResolver.openFileDescriptor(Uri.parse(path), "r")
+                val render = parcelFileDescriptor?.let { PdfRenderer(it) }
+                if (render != null) {
+                    for (i in 0 until render.pageCount) {
+                        val page = render.openPage(i)
+                        val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
+                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                        val inputImage = InputImage.fromBitmap(bitmap, 0)
+                        val visionText = recognizer.process(inputImage).await()
+                        extractText += visionText.text
+                        page.close()
+                    }
+                    getText(extractText)
+                    render.close()
+                    parcelFileDescriptor.close()
+                    Log.d("ExtractVisionText", extractText)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     fun savedData(prompt: String, result: String, title: String, context: Context) {
         val date = date()
@@ -69,8 +108,8 @@ class AIToolViewModal : ViewModel() {
                         Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
                     }
             }.addOnFailureListener {
-            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
-        }
+                Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+            }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

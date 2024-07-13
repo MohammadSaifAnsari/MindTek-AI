@@ -73,9 +73,6 @@ dependencies {
     //For loading images
     implementation(libs.coil.compose)
 
-    //pdf to text
-    implementation(libs.pspdfkit)
-
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))
 
@@ -111,6 +108,9 @@ dependencies {
 
     //google ads
     implementation (libs.play.services.ads)
+
+    // To recognize Latin script
+    implementation (libs.text.recognition)
 
 
     testImplementation(libs.junit)
