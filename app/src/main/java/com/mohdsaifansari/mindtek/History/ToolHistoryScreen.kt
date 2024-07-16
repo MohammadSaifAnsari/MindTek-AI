@@ -1,6 +1,7 @@
 package com.mohdsaifansari.mindtek.History
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +45,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +58,9 @@ import com.mohdsaifansari.mindtek.Components.NavigationItem
 import com.mohdsaifansari.mindtek.Data.LoadHistory
 import com.mohdsaifansari.mindtek.Database.ToolHistory.ToolHistoryDatabaseProvider
 import com.mohdsaifansari.mindtek.R
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,8 +146,10 @@ fun ScrollableHistoryView(
     context: Context
 ) {
     //Drop Down Menu
-    val menuList = listOf("Delete")
+    val menuList = listOf("Delete", "Copy", "Save")
     var selectedItem by remember { mutableStateOf("") }
+
+    val clipboardManager = LocalClipboardManager.current
 
     LazyColumn {
         items(
@@ -161,7 +169,8 @@ fun ScrollableHistoryView(
                             restoreState = true
                         }
                     },
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
             ) {
                 Row(
                     modifier = Modifier
@@ -218,7 +227,7 @@ fun ScrollableHistoryView(
                         DropdownMenu(
                             expanded = expandedDropDownMenu,
                             onDismissRequest = { expandedDropDownMenu = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.onSurfaceVariant)
+                            modifier = Modifier.background(MaterialTheme.colorScheme.onSurface)
                         ) {
                             menuList.forEach { label ->
                                 DropdownMenuItem(text = {
@@ -237,6 +246,23 @@ fun ScrollableHistoryView(
                                                 db = ToolHistoryDatabaseProvider.toolHistoryDatabase
                                             )
                                         }
+                                    }
+                                    if (label == "Copy") {
+                                        item.result?.let {
+                                            AnnotatedString(
+                                                it.substring(1, item.result.length - 1)
+                                            )
+                                        }?.let { clipboardManager.setText(it) }
+                                        Toast.makeText(context, "Copied ", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                    if (label == "Save") {
+                                        viewModel.saveTextasPdf(
+                                            item.result.toString()
+                                                .substring(1, item.result.toString().length - 1),
+                                            item.idNo.toString().trim(),
+                                            context = context
+                                        )
                                     }
                                 })
                             }

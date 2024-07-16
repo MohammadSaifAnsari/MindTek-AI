@@ -1,8 +1,13 @@
 package com.mohdsaifansari.mindtek.History
 
 import android.content.Context
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
+import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +23,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 class HistoryViewModel : ViewModel() {
 
@@ -127,6 +135,98 @@ class HistoryViewModel : ViewModel() {
                     _isloading.value = false
                     Log.d("ViewModel123", "Error fetching data: ${it.message}")
                 }
+        }
+    }
+
+    fun saveTextasPdf(
+        text: String, fileName: String, pageWidth: Int = 794,
+        pageHeight: Int = 1123,
+        context: Context
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val pdfDocument = PdfDocument()
+                var currentPage = pdfDocument.startPage(
+                    PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create()
+                )
+
+                val paint = Paint()
+                paint.color = Color.Black.toArgb()
+                paint.textSize = 25f
+
+                val x = 20f
+                var y = 50f
+                var currentLine = ""
+
+                for (word in text.split(" ")) {
+                    var potentialLine = if (currentLine.isEmpty()) {
+                        word
+                    } else {
+                        "$currentLine $word"
+                    }
+                    // Calculate the width of the remaining text
+                    val lineWidth = paint.measureText(potentialLine)
+
+                    // Check if the text fits on the current line
+                    if ((lineWidth <= pageWidth - 2 * x) && (y + paint.descent() - paint.ascent() <= pageHeight - 50f)) {
+                        // Word fits on current line and page
+                        currentLine = potentialLine
+                    } else {
+
+                        //Draw the current line
+                        currentPage.canvas.drawText(currentLine.trim(), x, y, paint)
+
+                        //Move to the next line or page
+                        y += paint.descent() - paint.ascent()
+                        if (y + paint.descent() - paint.ascent() > pageHeight - 50f) {
+                            pdfDocument.finishPage(currentPage)
+                            currentPage = pdfDocument.startPage(
+                                PdfDocument.PageInfo.Builder(
+                                    pageWidth,
+                                    pageHeight,
+                                    pdfDocument.pages.size + 1
+                                ).create()
+                            )
+                            y = 50f
+                        }
+                        // Start a new line with the current word
+                        currentLine = word
+                    }
+                }
+                // Draw the last remaining line
+                if (currentLine.isNotEmpty()) {
+                    currentPage.canvas.drawText(currentLine.trim(), x, y, paint)
+                }
+                pdfDocument.finishPage(currentPage)
+
+                val mindtekDirectory = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "Mindtek"
+                )
+                if (!mindtekDirectory.exists()) {
+                    mindtekDirectory.mkdirs()
+                }
+                var filePath = File(mindtekDirectory, "$fileName.pdf")
+
+                //Handle duplicate file names
+                var fileNumber = 1
+                while (filePath.exists()) {
+                    filePath = File(mindtekDirectory, "${fileName} (${fileNumber}).pdf")
+                    fileNumber++
+                }
+
+                val fileOutputStream = FileOutputStream(filePath)
+                pdfDocument.writeTo(fileOutputStream)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                }
+                pdfDocument.close()
+                fileOutputStream.close()
+                Log.d("his123", "saved")
+            } catch (e: Exception) {
+                Log.d("his123", "not saved")
+                e.printStackTrace()
+            }
         }
     }
 }
