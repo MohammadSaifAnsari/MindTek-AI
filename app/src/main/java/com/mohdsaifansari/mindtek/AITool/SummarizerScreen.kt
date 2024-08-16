@@ -2,6 +2,7 @@ package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
@@ -111,7 +112,9 @@ fun SummarizerScreen(
     val firestore = FirebaseFirestore.getInstance()
     val firebaseAuth = FirebaseAuth.getInstance()
     var path = ""
-    var inputText = ""
+    var inputText by remember {
+        mutableStateOf("")
+    }
     var outputMessage = ""
     val viewmodel: AIToolViewModal = viewModel()
     var text by remember {
@@ -381,6 +384,7 @@ fun SummarizerScreen(
 
             }
         }
+        Log.d("sum1234", inputText + outputMessage + isEnabledButton.toString())
         if (!isEnabledButton && inputText.isNotEmpty() && outputMessage.isNotEmpty()) {
             viewmodel.savedData(inputText, outputMessage, title, context)
         }
