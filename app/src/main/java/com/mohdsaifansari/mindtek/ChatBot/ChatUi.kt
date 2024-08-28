@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,7 +51,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ModalChatBox(response: String) {
+fun ModalChatBox(response: String, timestampText: String) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardColors(
@@ -64,11 +65,25 @@ fun ModalChatBox(response: String) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(bottom = 3.dp, top = 12.dp, start = 12.dp, end = 12.dp)
                 .background(Color.Transparent)
                 .clip(RoundedCornerShape(12.dp)),
             text = response, fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground
         )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp, start = 12.dp, end = 12.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = timestampText,
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
     }
 
 
@@ -76,7 +91,7 @@ fun ModalChatBox(response: String) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun UserUriChatBox(prompt: String, imageUri: String) {
+fun UserUriChatBox(prompt: String, imageUri: String, timestampText: String) {
     Column(
         modifier = Modifier.padding(start = 100.dp, bottom = 11.dp, top = 22.dp)
     ) {
@@ -108,12 +123,28 @@ fun UserUriChatBox(prompt: String, imageUri: String) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp, top = 12.dp, start = 12.dp, end = 12.dp)
+                    .padding(bottom = 3.dp, top = 12.dp, start = 12.dp, end = 12.dp)
                     .background(Color.Transparent)
                     .clip(RoundedCornerShape(12.dp)),
                 text = prompt, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp, start = 12.dp, end = 12.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = timestampText,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
+
     }
 }
 

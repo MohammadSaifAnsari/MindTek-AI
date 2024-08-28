@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.UUID
 
 class ChatViewModel : ViewModel() {
@@ -246,6 +248,13 @@ class ChatViewModel : ViewModel() {
         val stream = ByteArrayOutputStream()
         compress(Bitmap.CompressFormat.PNG, 50, stream)
         return stream.toByteArray()
+    }
+
+    fun TimestampToTime(timestamp: Long): String {
+        val date = Date(timestamp);
+        val format = SimpleDateFormat("EEEE, hh:mm a")
+        val time = format.format(date)
+        return time
     }
 
 }

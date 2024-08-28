@@ -597,9 +597,16 @@ class MainActivity : ComponentActivity() {
                     itemsIndexed(chatState.chatList) { index, chat ->
                         if (chat != null) {
                             if (chat.isUser) {
-                                UserUriChatBox(prompt = chat.message, imageUri = chat.imageAddress)
+                                UserUriChatBox(
+                                    prompt = chat.message,
+                                    imageUri = chat.imageAddress,
+                                    timestampText = chatViewModel.TimestampToTime(chat.timestamp)
+                                )
                             } else {
-                                ModalChatBox(response = chat.message)
+                                ModalChatBox(
+                                    response = chat.message,
+                                    timestampText = chatViewModel.TimestampToTime(chat.timestamp)
+                                )
                             }
                         }
                     }
