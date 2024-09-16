@@ -1,7 +1,13 @@
 package com.mohdsaifansari.mindtek.ChatBot
 
 import android.app.Activity
+import android.content.Context
+import android.widget.ImageButton
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -29,10 +36,16 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -45,56 +58,164 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
 import com.mohdsaifansari.mindtek.AdsMob.rewardedAds
+import com.mohdsaifansari.mindtek.Database.ChatDatabase
 import com.mohdsaifansari.mindtek.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun ModalChatBox(response: String, timestampText: String) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            disabledContainerColor = Color.Transparent,
-            disabledContentColor = Color.Transparent
-        ),
-        modifier = Modifier.padding(start = 8.dp, end = 100.dp, bottom = 22.dp)
+fun ModalChatBox(
+    response: String,
+    timestamp: String,
+    timeAndDate: String,
+    context: Context,
+    chatViewModel: ChatViewModel,
+    reload: () -> Unit
+) {
+    var isLongPressed by remember {
+        mutableStateOf(false)
+    }
+    var showDeleteIcon by remember {
+        mutableStateOf(false)
+    }
+    Row(
+        modifier = Modifier
+            .padding(bottom = 30.dp)
+            .fillMaxWidth()
+            .background(if (isLongPressed) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    isLongPressed = true
+                }, onPress = {
+                    isLongPressed = false
+                })
+            },
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
+
+        Card(
+            shape = RoundedCornerShape(8.dp),
+            colors = CardColors(
+                containerColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.onBackground,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = Color.Transparent
+            ),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 3.dp, top = 12.dp, start = 12.dp, end = 12.dp)
-                .background(Color.Transparent)
-                .clip(RoundedCornerShape(12.dp)),
-            text = response, fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp, start = 12.dp, end = 12.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(start = 8.dp, bottom = 3.dp, top = 2.dp)
+                .fillMaxWidth(0.8f)
         ) {
-            Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = timestampText,
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onBackground
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 3.dp, top = 12.dp, start = 12.dp, end = 12.dp)
+                    .background(Color.Transparent)
+                    .clip(RoundedCornerShape(12.dp)),
+                text = response, fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp, start = 12.dp, end = 12.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = timeAndDate,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+
+        if (showDeleteIcon) {
+            Icon(
+                modifier = Modifier
+                    .size(50.dp)
+                    .padding(end = 20.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable {
+                        chatViewModel.deleteChatItem(timestamp, onSuccess = {
+                            reload()
+                            Toast
+                                .makeText(context, "Message Deleted", Toast.LENGTH_SHORT)
+                                .show()
+                        }, onFailure = {
+                            Toast
+                                .makeText(context, "Failed to delete message", Toast.LENGTH_SHORT)
+                                .show()
+                        })
+                    },
+                contentDescription = "picked image",
+                imageVector = Icons.Rounded.Delete,
+                tint = Color.Red
             )
         }
+        LaunchedEffect(isLongPressed) {
+            showDeleteIcon = isLongPressed
+        }
     }
-
 
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun UserUriChatBox(prompt: String, imageUri: String, timestampText: String) {
-    Column(
-        modifier = Modifier.padding(start = 100.dp, bottom = 11.dp, top = 22.dp)
+fun UserUriChatBox(
+    prompt: String,
+    imageUri: String,
+    timestamp: String,
+    timeAndDate: String,
+    context: Context,
+    chatViewModel: ChatViewModel,
+    reload: () -> Unit
+) {
+    var isLongPressed by remember {
+        mutableStateOf(false)
+    }
+    var showDeleteIcon by remember {
+        mutableStateOf(false)
+    }
+    Row(
+        modifier = Modifier
+            .padding(bottom = 30.dp, top = 20.dp)
+            .fillMaxWidth()
+            .background(if (isLongPressed) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    isLongPressed = true
+                }, onPress = {
+                    isLongPressed = false
+                })
+            },
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        if (showDeleteIcon) {
+            Icon(
+                modifier = Modifier
+                    .size(50.dp)
+                    .padding(start = 8.dp, end = 8.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable {
+                        chatViewModel.deleteChatItem(timestamp, onSuccess = {
+                            reload()
+                            Toast
+                                .makeText(context, "Message Deleted", Toast.LENGTH_SHORT)
+                                .show()
+                        }, onFailure = {
+                            Toast
+                                .makeText(context, "Failed to delete message", Toast.LENGTH_SHORT)
+                                .show()
+                        })
+                    },
+                contentDescription = "picked image",
+                imageVector = Icons.Rounded.Delete,
+                tint = Color.Red
+            )
+        }
 
         Card(
             shape = RoundedCornerShape(8.dp),
@@ -104,7 +225,13 @@ fun UserUriChatBox(prompt: String, imageUri: String, timestampText: String) {
                 disabledContainerColor = Color.Transparent,
                 disabledContentColor = Color.Transparent
             ),
-            modifier = Modifier.padding(bottom = 22.dp)
+            modifier = Modifier
+                .padding(
+                    bottom = 3.dp,
+                    top = 2.dp,
+                    end = 8.dp
+                )
+                .fillMaxWidth(0.78f)
         ) {
             if (imageUri.isNotEmpty()) {
                 GlideImage(
@@ -138,11 +265,14 @@ fun UserUriChatBox(prompt: String, imageUri: String, timestampText: String) {
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = timestampText,
+                    text = timeAndDate,
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+        }
+        LaunchedEffect(isLongPressed) {
+            showDeleteIcon = isLongPressed
         }
 
     }

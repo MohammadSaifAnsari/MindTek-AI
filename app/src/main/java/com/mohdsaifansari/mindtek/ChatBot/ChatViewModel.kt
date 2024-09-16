@@ -42,7 +42,6 @@ class ChatViewModel : ViewModel() {
     private val uid = firebaseAuth.currentUser?.uid.toString()
     private var isFetchingOnlineData = false
 
-
     fun onEvent(event: ChatUiState) {
         when (event) {
             is ChatUiState.SendPrompt -> {
@@ -239,6 +238,32 @@ class ChatViewModel : ViewModel() {
                 }.addOnFailureListener {
                     _iscircularloading.value = false
                     Log.d("ChatViewModal", "Error in fetching chat List data ")
+                }
+        }
+    }
+
+    fun deleteChatItem(timestamp: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            firestore.collection("ChatBot").document(uid).collection("ChatList")
+                .get().addOnSuccessListener { result ->
+                    var deleted = false
+                    for (document in result) {
+                        if (document.data.get("timestamp").toString() == timestamp) {
+                            firestore.collection("ChatBot").document(uid)
+                                .collection("ChatList").document(document.id)
+                                .delete().addOnSuccessListener {
+                                    deleted = true
+                                    onSuccess()
+                                }.addOnFailureListener {
+                                    Log.d(
+                                        "delChat123",
+                                        document.data.get("timestamp").toString() + timestamp
+                                    )
+                                }
+                        }
+                    }
+                }.addOnFailureListener {
+                    onFailure()
                 }
         }
     }

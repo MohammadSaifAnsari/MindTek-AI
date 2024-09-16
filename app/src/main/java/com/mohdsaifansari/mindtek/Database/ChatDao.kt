@@ -19,4 +19,7 @@ interface ChatDao {
 
     @Query("SELECT * FROM ChatEntity ORDER BY timestamp")
     fun getAllChats(): Flow<List<ChatEntity>>
+
+    @Query("Delete FROM ChatEntity WHERE timestamp = :timestamp")
+    suspend fun deleteChatByTimestamp(timestamp: Long)
 }

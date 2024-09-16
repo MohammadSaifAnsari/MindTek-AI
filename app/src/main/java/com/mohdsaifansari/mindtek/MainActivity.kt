@@ -79,6 +79,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -126,11 +127,13 @@ import com.mohdsaifansari.mindtek.Setting.SettingScreen
 import com.mohdsaifansari.mindtek.Setting.ThemeChange.ThemePreference
 import com.mohdsaifansari.mindtek.Setting.ThemeChange.dataStore
 import com.mohdsaifansari.mindtek.ui.theme.MindtekTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -600,12 +603,42 @@ class MainActivity : ComponentActivity() {
                                 UserUriChatBox(
                                     prompt = chat.message,
                                     imageUri = chat.imageAddress,
-                                    timestampText = chatViewModel.TimestampToTime(chat.timestamp)
+                                    timestamp = chat.timestamp.toString(),
+                                    timeAndDate = chatViewModel.TimestampToTime(chat.timestamp),
+                                    context = context,
+                                    chatViewModel = chatViewModel,
+                                    reload = {
+                                        chatViewModel.viewModelScope.launch {
+                                            withContext(Dispatchers.IO) {
+                                                ChatDatabaseProvider.chatDatabase.chatDao()
+                                                    .deleteChatByTimestamp(chat.timestamp)
+                                                chatViewModel.checkChatData(
+                                                    context,
+                                                    db = ChatDatabaseProvider.chatDatabase
+                                                )
+                                            }
+                                        }
+                                    }
                                 )
                             } else {
                                 ModalChatBox(
                                     response = chat.message,
-                                    timestampText = chatViewModel.TimestampToTime(chat.timestamp)
+                                    timeAndDate = chatViewModel.TimestampToTime(chat.timestamp),
+                                    timestamp = chat.timestamp.toString(),
+                                    context = context,
+                                    chatViewModel = chatViewModel,
+                                    reload = {
+                                        chatViewModel.viewModelScope.launch {
+                                            withContext(Dispatchers.IO) {
+                                                ChatDatabaseProvider.chatDatabase.chatDao()
+                                                    .deleteChatByTimestamp(chat.timestamp)
+                                                chatViewModel.checkChatData(
+                                                    context,
+                                                    db = ChatDatabaseProvider.chatDatabase
+                                                )
+                                            }
+                                        }
+                                    }
                                 )
                             }
                         }
