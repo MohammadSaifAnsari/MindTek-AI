@@ -112,6 +112,8 @@ fun Generation(title: String, subTitle: String, context: Context, navController:
     }
 
     val coinViewModal = viewModel<CoinViewModal>()
+
+    val viewmodelSum: SummarizerViewModel = viewModel()
     Scaffold(
         topBar = {
             HeaderComponent(title = title, navigationIconClickable = {
@@ -278,7 +280,9 @@ fun Generation(title: String, subTitle: String, context: Context, navController:
                     }
                     SheetContentScreen(
                         outputMessage.substring(1, (outputMessage.length - 1)),
-                        viewmodel
+                        viewmodel,
+                        false,
+                        viewmodelSum
                     )
                     showDialog = false
                     Box(
@@ -323,7 +327,7 @@ fun Generation(title: String, subTitle: String, context: Context, navController:
 
 
 @Composable
-fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal) {
+fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal,isLocalSumModel:Boolean,viewModelSum: SummarizerViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,9 +346,16 @@ fun SheetContentScreen(getResponse: String, viewModal: AIToolViewModal) {
             modifier = Modifier
                 .padding(16.dp)
         )
-        if (viewModal.isloadingAnimation.collectAsState().value) {
-            LoadingAnimation(circleSize = 10.dp, spaceBetween = 4.dp, travelDistance = 10.dp)
+        if (isLocalSumModel){
+            if (viewModelSum.isloadingAnimation.collectAsState().value) {
+                LoadingAnimation(circleSize = 10.dp, spaceBetween = 4.dp, travelDistance = 10.dp)
+            }
+        }else{
+            if (viewModal.isloadingAnimation.collectAsState().value) {
+                LoadingAnimation(circleSize = 10.dp, spaceBetween = 4.dp, travelDistance = 10.dp)
+            }
         }
+
     }
 }
 

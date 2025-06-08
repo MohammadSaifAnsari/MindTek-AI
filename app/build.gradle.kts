@@ -23,6 +23,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     buildTypes {
@@ -48,6 +56,15 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    androidResources {
+        noCompress += listOf("tflite", "txt")
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 }
@@ -94,6 +111,8 @@ dependencies {
 
 
     implementation(libs.androidx.room.runtime)
+    implementation(libs.litert.gpu)
+    implementation(libs.litert)
     annotationProcessor(libs.androidx.room.compiler)
     // To use Kotlin Symbol Processing (KSP)
     ksp(libs.androidx.room.compiler)
@@ -111,6 +130,9 @@ dependencies {
 
     // To recognize Latin script
     implementation (libs.text.recognition)
+
+
+    implementation(libs.litert.gpu)
 
 
     testImplementation(libs.junit)

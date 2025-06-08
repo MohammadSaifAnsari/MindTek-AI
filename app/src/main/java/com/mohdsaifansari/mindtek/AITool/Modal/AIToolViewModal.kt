@@ -32,7 +32,7 @@ import java.time.LocalDate
 
 class AIToolViewModal : ViewModel() {
 
-    private val _isloadingAnimation = MutableStateFlow<Boolean>(true)
+    private val _isloadingAnimation = MutableStateFlow<Boolean>(false)
     val isloadingAnimation: StateFlow<Boolean> = _isloadingAnimation.asStateFlow()
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -51,6 +51,7 @@ class AIToolViewModal : ViewModel() {
     }
 
     fun sendMessage(message: String) = viewModelScope.launch() {
+        _isloadingAnimation.value = true
         var fullResponse = ""
         genAi.generateContentStream(message).collect() { chunk ->
             list.add(chunk.text.toString())

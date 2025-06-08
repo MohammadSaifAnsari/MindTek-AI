@@ -1,6 +1,7 @@
 package com.mohdsaifansari.mindtek.AITool
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -26,10 +27,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,13 +43,18 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
@@ -69,9 +79,17 @@ import com.mohdsaifansari.mindtek.AITool.Modal.AIToolViewModal
 import com.mohdsaifansari.mindtek.AdsMob.CoinViewModal
 import com.mohdsaifansari.mindtek.Components.HeaderComponent
 import com.mohdsaifansari.mindtek.Components.NavigationItem
+import com.mohdsaifansari.mindtek.LocalModelPreference
+import com.mohdsaifansari.mindtek.Network.NetworkConnectivityChecker
 import com.mohdsaifansari.mindtek.R
+import com.mohdsaifansari.mindtek.SentencePieceTokenizer
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.ThemePreference
+import com.mohdsaifansari.mindtek.Setting.ThemeChange.dataStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -80,7 +98,9 @@ fun MainSummarizerScreen(
     context: Context,
     pdfUri: MutableStateFlow<String>,
     launcher: ActivityResultLauncher<String>,
-    clearPdfUri: (String) -> Unit
+    clearPdfUri: (String) -> Unit,
+    spModelPath: String,
+    assets: AssetManager
 ) {
     val titleFromNav = navController.currentBackStackEntry?.arguments?.getString("title")
     val subtitleFromNav = navController.currentBackStackEntry?.arguments?.getString("subtitle")
@@ -93,7 +113,9 @@ fun MainSummarizerScreen(
         navController = navController,
         clearUri = {
             clearPdfUri(it)
-        }
+        },
+        spModelPath,
+        assets
     )
 }
 
@@ -107,7 +129,9 @@ fun SummarizerScreen(
     pdfUri: MutableStateFlow<String>,
     launcher: ActivityResultLauncher<String>,
     navController: NavController,
-    clearUri: (String) -> Unit
+    clearUri: (String) -> Unit,
+    spModelPath: String,
+    assets: AssetManager
 ) {
     val firestore = FirebaseFirestore.getInstance()
     val firebaseAuth = FirebaseAuth.getInstance()
@@ -133,6 +157,23 @@ fun SummarizerScreen(
     }
 
     val coinViewModal = viewModel<CoinViewModal>()
+
+
+    val viewmodelSum: SummarizerViewModel = viewModel()
+
+    var isLocalSumModel by remember { mutableStateOf(false) }
+    val modelChange = remember { LocalModelPreference(context.dataStore) }
+    val coroutineScope = rememberCoroutineScope()
+
+    var isLoading by remember { mutableStateOf(false) }
+    var localSumModelResult by remember { mutableStateOf("") }
+
+    var tokenCount by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        modelChange.readModelPreferences().collect {
+            isLocalSumModel = it
+        }
+    }
     Scaffold(
         topBar = {
             HeaderComponent(title = title, navigationIconClickable = {
@@ -181,6 +222,68 @@ fun SummarizerScreen(
                 fontFamily = FontFamily.Serif,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Column(modifier = Modifier
+                .fillMaxWidth().height(100.dp), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()) {
+                    Text(text = "Work Offline",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 10.dp, top = 10.dp, bottom = 10.dp).weight(0.5f),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Start,
+                        fontFamily = FontFamily.Serif,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Switch(
+                        checked = isLocalSumModel,
+                        onCheckedChange = { isChecked ->
+                            isLocalSumModel = isChecked
+                            coroutineScope.launch { modelChange.saveModelPreferences(isChecked) }
+                        },
+                        thumbContent = {
+                            Icon(
+                                imageVector = if (isLocalSumModel) {
+                                    Icons.Default.Check
+                                } else {
+                                    Icons.Default.Clear
+                                }, contentDescription = null
+                            )
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                            checkedTrackColor = MaterialTheme.colorScheme.secondary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.secondary,
+                            checkedIconColor = MaterialTheme.colorScheme.onBackground,
+                            uncheckedIconColor = MaterialTheme.colorScheme.onBackground
+                        ), modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+                Row(modifier = Modifier
+                    .fillMaxWidth().weight(1f)) {
+                    Text(text = "Word Count",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 10.dp, top = 5.dp, bottom = 5.dp).weight(0.5f),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Start,
+                        fontFamily = FontFamily.Serif,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(text = "$tokenCount",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 5.dp, end = 20.dp, top = 5.dp, bottom = 5.dp).weight(0.5f),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.End,
+                        fontFamily = FontFamily.Serif,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -194,7 +297,37 @@ fun SummarizerScreen(
                         .padding(top = 8.dp, bottom = 8.dp),
                     value = text,
                     onValueChange = { newText ->
-                        text = newText
+                        val tokens = SentencePieceTokenizer.encode(newText)
+                        if(isLocalSumModel){
+                            try {
+                                if (tokens.size <= 1500) {
+                                    try {
+                                        if (tokens.size >= 100) {
+                                            isEnabledButton = true
+                                        }else{
+                                            isEnabledButton = false
+                                        }
+                                        tokenCount = tokens.size
+                                    } catch (e: Exception) {
+                                        isEnabledButton = false
+                                        tokenCount = 0
+                                    }
+                                } else {
+                                    Toast.makeText(context,"Max 1500 Token Limit Reached",Toast.LENGTH_SHORT).show()
+                                    tokenCount = tokens.size
+                                    isEnabledButton = false
+                                    // Optionally show a message or simply ignore the input that would exceed the limit.
+                                    Log.d("Summarizer", "Input exceeds 512 tokens; change ignored")
+                                }
+                                text = newText
+                            } catch (e: Exception) {
+                                Log.e("Summarizer", "Tokenization error: ${e.message}")
+                                text = newText  // Fallback: allow input if tokenization fails
+                            }
+                        }else{
+                            tokenCount = tokens.size
+                            text = newText
+                        }
                     },
                     placeholder = {
                         Text(text = "Type a prompt")
@@ -246,48 +379,66 @@ fun SummarizerScreen(
             }
             Button(
                 onClick = {
-                    if (coinViewModal.isCoin.value >= 10) {
-                        inputText = text
-                        text = ""
-                        clearUri("")
-                        val uid = firebaseAuth.currentUser?.uid.toString()
-                        firestore.collection("History").document(uid)
-                            .update("Count", FieldValue.increment(1))
-                            .addOnSuccessListener {
-                                coinViewModal.subtractCoin(context)
-                                coinViewModal.getCoin()
-                            }.addOnFailureListener {
-                                Toast.makeText(
-                                    context,
-                                    "Something went wrong",
-                                    Toast.LENGTH_SHORT
-                                ).show();
+
+                    if(isLocalSumModel){
+                        coroutineScope.launch{
+                            isEnabledButton = false
+                            isLoading = true
+                            val result = withContext(Dispatchers.IO){
+                                viewmodelSum.runSummarizationWithBatchedBeam(spModelPath,text,assets)
                             }
-                        viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
-                        showBottomSheet = true
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Insufficient coins",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            localSumModelResult = result
+                            isLoading = false
+                            showBottomSheet = true
+                        }
+                    }else{
+                        if (coinViewModal.isCoin.value >= 10) {
+                            inputText = text
+                            text = ""
+                            clearUri("")
+                            val uid = firebaseAuth.currentUser?.uid.toString()
+                            firestore.collection("History").document(uid)
+                                .update("Count", FieldValue.increment(1))
+                                .addOnSuccessListener {
+                                    coinViewModal.subtractCoin(context)
+                                    coinViewModal.getCoin()
+                                }.addOnFailureListener {
+                                    Toast.makeText(
+                                        context,
+                                        "Something went wrong",
+                                        Toast.LENGTH_SHORT
+                                    ).show();
+                                }
+                            viewmodel.sendMessage(viewmodel.PromptCase(title = title) + inputText)
+                            showBottomSheet = true
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Insufficient coins",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 },
                 enabled = isEnabledButton,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
+                    .height(70.dp)
                     .padding(start = 20.dp, top = 4.dp, end = 20.dp, bottom = 4.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
-                Text(
-                    text = "Summarize",
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.padding(2.dp).align(Alignment.CenterVertically), color = Color.White )
+                } else {
+                    Text(
+                        text = "Summarize",
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
 
         }
@@ -301,7 +452,12 @@ fun SummarizerScreen(
                     .windowInsetsPadding(WindowInsets.systemBars),
                 dragHandle = null, tonalElevation = 100.dp
             ) {
-                outputMessage = viewmodel.list.toList().toString()
+                if (isLocalSumModel){
+                    outputMessage = viewmodelSum.isModelResult.collectAsState().value
+
+                }else{
+                    outputMessage = viewmodel.list.toList().toString()
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -354,7 +510,9 @@ fun SummarizerScreen(
                     }
                     SheetContentScreen(
                         outputMessage.substring(1, (outputMessage.length - 1)),
-                        viewmodel
+                        viewmodel,
+                        isLocalSumModel,
+                        viewmodelSum
                     )
                     Box(
                         modifier = Modifier

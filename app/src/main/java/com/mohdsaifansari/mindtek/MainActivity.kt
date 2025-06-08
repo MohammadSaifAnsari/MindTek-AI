@@ -2,10 +2,13 @@ package com.mohdsaifansari.mindtek
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -134,6 +137,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : ComponentActivity() {
 
@@ -179,6 +184,27 @@ class MainActivity : ComponentActivity() {
             delay(1000)
             keepSplashScreenVisible = false
         }
+
+
+        // Copy spiece.model from assets to a file in the cache directory.
+        val modelFile = File(cacheDir, "spiece.model")
+        if (!modelFile.exists()) {
+            copyAssetToFile(assets, "spiece.model", modelFile)
+        }
+        Log.d("SummarizerModel", "Model file path: ${modelFile.absolutePath}")
+
+
+        // Load the SentencePiece model using the file path.
+        if (!SentencePieceTokenizer.loadModel(modelFile.absolutePath)) {
+            Log.e("SummarizerModel", "Failed to load SentencePiece model")
+        } else {
+            Log.d("SummarizerModel", "SentencePiece model loaded successfully")
+        }
+        val isGpuSupported = packageManager.hasSystemFeature(PackageManager.FEATURE_OPENGLES_EXTENSION_PACK)
+        Log.d("DeviceCheck", "GPU delegate supported: $isGpuSupported")
+
+
+
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 Color.Transparent.toArgb(),
@@ -276,7 +302,9 @@ class MainActivity : ComponentActivity() {
                                 launcher,
                                 clearPdfUri = { clearpdfUri ->
                                     pdfUri.update { clearpdfUri }
-                                })
+                                },
+                                modelFile.absolutePath,
+                                assets)
                         }
                     }
                     navigation(
@@ -727,4 +755,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+// Helper function to copy asset file to a destination file.
+private fun copyAssetToFile(assetManager: AssetManager, assetName: String, outFile: File) {
+    assetManager.open(assetName).use { inputStream ->
+        FileOutputStream(outFile).use { outputStream ->
+            inputStream.copyTo(outputStream)
+        }
+    }
+    Log.d("SummarizerModel", "Copied $assetName to ${outFile.absolutePath}")
 }
